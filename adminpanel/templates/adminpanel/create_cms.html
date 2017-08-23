@@ -1,0 +1,33 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}Add cms{% endblock %}
+{% block content %}
+  <div class="col-md-12">
+      <form method="post" action="/admin/create-cms/" enctype="multipart/form-data">{% csrf_token %}
+              <div class="form-group">
+                <label for="title">Page Title:</label>
+                <input name="cms_title" value="{{ cms_title }}" type="text" class="form-control" id="title">
+              </div>
+              <div class="form-group">
+                <label for="content">Page Content:</label>
+                <textarea name="cms_content" id="summernote">{{ cms_content }}</textarea>
+              </div>
+              <div class="form-group">
+                <label for="content">Upload pic:</label>
+                <input type="file" name="picture">
+              </div>
+              <button type="submit" class="btn btn-default btn-primary">Submit</button>
+        </form>
+   </div>
+{% endblock %}
+{% block script %}
+<script>
+$(document).ready(function() {
+  $('#summernote').summernote({
+  height: 300,                 // set editor height
+  minHeight: 300,             // set minimum height of editor
+  maxHeight: null,             // set maximum height of editor
+  focus: true                  // set focus to editable area after initializing summernote
+});
+});
+</script>
+{% endblock %}

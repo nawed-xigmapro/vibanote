@@ -1,0 +1,44 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}track analytics{% endblock %}
+{% block content %}
+<div class="col-md-12">
+    <!-- page content -->
+    <h2 class="page-heading">Track Analytics</h2>  
+    
+    <div class="row">
+        <div class="col-md-3">
+            <h4 style="text-align: center;">last 7 days</h4>
+            <div class="thumbnail">
+                <div><h4 style="text-align: center;">Number Of Tracks</h4></div>
+                <div class="clearfix"></div>
+                <div><h1 style="text-align: center;">{{ sevendays_tracks }}</h1></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <h4 style="text-align: center;">last 30 days</h4>
+            <div class="thumbnail">
+                <div><h4 style="text-align: center;">Number Of Tracks</h4></div>
+                <div class="clearfix"></div>
+                <div><h1 style="text-align: center;">{{ thirtydays_tracks }}</h1></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <h4 style="text-align: center;">last 90 days</h4>
+            <div class="thumbnail">
+                <div><h4 style="text-align: center;">Number Of Tracks</h4></div>
+                <div class="clearfix"></div>
+                <div><h1 style="text-align: center;">{{ ninetydays_tracks }}</h1></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <h4 style="text-align: center;">All Time</h4>
+            <div class="thumbnail">
+                <div><h4 style="text-align: center;">Number Of Tracks</h4></div>
+                <div class="clearfix"></div>
+                <div><h1 style="text-align: center;">{{ alltime_tracks }}</h1></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /page content -->
+{% endblock %}    

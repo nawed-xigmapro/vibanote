@@ -1,0 +1,232 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}album details{% endblock %}
+{% block content %}
+{% load admin_fun %}
+<style>
+.tag span{ color: white; }
+.track-details {
+    display: block;
+    margin: 0;
+    padding: 0;
+}    
+.track-details li {
+    display: inline-block;
+    margin-bottom: 15px;
+    width: 100%;
+    border-bottom: 1px solid #e6e5e5;
+    padding-bottom: 15px;
+}
+.track-detail-content {
+    width: calc(100% - 80px);
+    float: left;
+    padding-left: 15px;
+}
+.track-detail-img {
+    width: 80px;
+    float: left;
+}
+.profilepage-image img {
+    padding: 4px;
+    border: 3px solid #1FAE5B;
+    border-left-color: rgb(31, 174, 91);
+    border-left-color: transparent;
+}
+.img200_200 {
+    width: 200px;
+    height: 200px;
+}
+
+</style>
+<div class="col-xs-12">
+    <div class="box">
+        <div class="box-header">
+            <h3 class="box-title">{{ album.title }}</h3>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+        
+        {% comment %}
+        <p><button data-toggle="modal" data-target="#trackmodal" type="button" class="pull-right">Add Tracks</button></p>
+        <div class="modal fade signin-modal" id="trackmodal" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <div id="logbox">
+                            <form role="form" id="frm_trackupload" method="post" action="/trackupload/" enctype="multipart/form-data">{% csrf_token %}
+                                <h3>Upload Track</h3>
+                                 <div class="form-group">
+                                    <label>Track Title<span style="color: red;">*</span></label>
+                                    <input name="title" type="text" class="form-control" required="">
+                                 </div>
+                                 <div class="form-group">
+                                    <label>Track Subtitle</label>
+                                    <input name="subtitle" type="text" class="form-control">
+                                 </div>
+                                 <div class="form-group ">
+                                    <label>upload track image<span style="color: red;">*</span></label>
+                                    <input id="id_track_image" name="track_image" type="file" accept="image/*" required="">
+                                 </div>
+                                 <div class="form-group ">
+                                    <label>upload track<span style="color: red;">*</span></label>
+                                    <input id="id_track_file" name="track_file" type="file" accept=".mp3,.wav,.ogg" required="">
+                                 </div>
+                                 <div class="form-group text-center">
+                                     <input type="hidden" name="album_id" value="{{ album.id }}">
+                                     <input type="hidden" name="album_slug" value="{{ album.slug }}">
+                                    <input type="submit" value="Upload Track" class="btn btn-danger">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endcomment %}
+        <div class="upload-album">
+            <div class="col-md-3">
+		<div class="profilepage-image">
+                {% if album.album_image %}    
+                    <img alt="" src="/media/{{album.album_image}}" class="img200_200 img-circle">
+                {% else %}   
+                    <img class="img200_200 img-circle" src="/static/images/no-content.jpg">
+                {% endif %} 
+		</div>	
+	    </div>
+            <div class="col-md-6">
+                <form method="post" action="/admin/album-edit/" enctype="multipart/form-data">{% csrf_token %}
+                
+                    <div class="form-group">
+                        <label>Album Title<span style="color: red;">*</span></label>
+                        <input name="title" value="{{ album.title }}" type="text" class="form-control" required="">
+                    </div>
+                    <div class="form-group">
+                     <label>
+                        {% userdetails album.uploadby_id as artist_album %}  
+                        <a style="color: black;font-style: italic;" href="{% url 'get_userdetails' artist_album.user_id %}">
+                            Artist-&nbsp;{{artist_album.name}}
+                         </a>    
+                     </label>   
+                    </div>
+                    <div class="form-group">
+                        <label>Album Subtitle</label>
+                        <input name="subtitle" value="{{ album.subtitle }}" type="text" class="form-control">
+                    </div>
+                    <div class="form-group ">
+                        <label>upload Album image</label>
+                        <input id="id_track_image" name="album_image" type="file" accept="image/*">
+                    </div>
+                    <div class="form-group ">
+                        <label>Selected Genre</label>
+                        <select required name="genre_id" class="form-control">
+                            <option value="">Select</option>
+                            {% for gen in genre %}
+                                <option value="{{gen.id}}" {% if album.genre_id == gen.id %}selected{% endif%}>{{ gen.title }}</option>
+                            {% endfor%}
+                        </select>
+                    </div>
+                    <div class="form-group ">
+                        <label>Selected Type</label>
+                        <select required name="types_id" class="form-control">
+                            <option value="">Select</option>
+                            {% for typ in types %}
+                                <option value="{{typ.id}}" {% if album.types_id == typ.id %}selected{% endif%}>{{ typ.title }}</option>
+                            {% endfor%}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Dedicate To</label>
+                        <input value="{{ album.dedicate }}" name="dedicate" type="text" class="tags form-control" id='tags_3' >
+                     </div>
+
+                    <div class="form-group text-center">
+                        <input type="hidden" name="album_id" value="{{ album.id }}">
+                        <input name="btn_edit" type="submit" value="Edit Album" class="btn btn-danger">
+                        <button name="btn_delete" onclick="return ConfirmDelete()" class="btn btn-danger">Delete</button>
+                        {% if album.is_approved == 0 %}
+                            <button type="button" name="btn_approve" onclick="approve_album({{ album.id }})" class="btn btn-danger">Approve</button>
+                        {% else %}    
+                            <button type="button" name="btn_disapprove" onclick="disapprove_album({{ album.id }})" class="btn btn-danger">Disapprove</button>
+                        {% endif %}
+                    </div>
+                </form> 
+            </div>
+        </div>
+        <div class="clearfix">&nbsp;</div>
+        {% if albumtracks %}
+        <h1>Tracks</h1><br/>
+        <div class="row">
+            <div class="col-md-9 col-sm-9">
+                <ul class="track-details">
+                {% for albumtrack in albumtracks %}    
+                    <li>
+			<div class="track-detail-img">
+                            <a href="#">
+                              {% if albumtrack.track_image %}  
+                                <img style="height:80px;width: 80px;" alt="" src="/media/{{ albumtrack.track_image }}">
+                              {% else %}  
+                                <img style="height:80px;width: 80px;" alt="" src="/static/images/no-content.jpg">
+                              {% endif %}
+                            </a>
+                        </div>
+			<div class="track-detail-content">
+                            <h4><a style="margin-left:13px;" href="{% url 'admin_track_details' albumtrack.slug %}">{{albumtrack.title}}</a></h4>
+                            <audio controls="controls">
+                                <source src="/media/{{ albumtrack.track_file }}" type="audio/mpeg" />
+                            </audio>
+                        </div>	
+		    </li>
+                {% endfor %}    
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    </div>
+</div>
+<!-- /page content -->
+{% endblock %}
+{% block script %}
+<link href="/static/css/profile/jquery.tagsinput.css" rel="stylesheet">
+<script src="/static/js/profile/jquery.tagsinput.js"></script>
+<script>
+  $('#tags_3').tagsInput({
+      width: 'auto'
+  });
+</script>
+<script>
+function ConfirmDelete()
+{
+  var x = confirm("Are you sure you want to delete?");
+  if (x)
+      return true;
+  else
+    return false;
+}
+</script>
+<script>
+    function approve_album(album_id){
+         ajax_call("admin/approve-album",album_id);
+    }
+    function disapprove_album(album_id){
+       ajax_call("admin/disapprove-album",album_id);
+    }
+    function ajax_call(url,album_id){
+        $.ajax({// create an AJAX call...
+            data: {album_id: album_id},
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            url: '/'+url+'/', // the file to call
+            beforeSend: function() {
+                $("#default_loader").show();
+            },
+            success: function (response) { // on success..
+               if(response) {
+                    $("#default_loader").hide();
+                    location.reload(); 
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}Most Liked{% endblock %}
+{% block content %}
+<div class="col-md-12">
+    <!-- page content -->
+    <h2 class="page-heading" style="text-align: center;">Most Liked</h2>  
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="thumbnail">    
+             <h3 style="text-align: center;"> Top 5 Tracks</h3>   
+            {% if liked_tracks %}
+            {% for liked_track in liked_tracks %}    
+            <div class="row">
+                    <div class="col-md-12">
+                        <a href="{% url 'admin_track_details' liked_track.slug %}">
+                            <p style="text-align: center; font-size: 20px;">{{ liked_track.title }}</p>
+                        </a>    
+                    </div>
+                </div>
+            {% endfor %}
+            {% else %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <p style="text-align: center; font-size: 20px;">No Tracks are liked.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        </div>
+        <div class="col-md-4">
+        <div class="thumbnail">    
+            <h3 style="text-align: center;">Top 5 Albums</h3>    
+            {% if liked_albums %}
+            {% for liked_album in liked_albums %}    
+                <div class="row">
+                    <div class="col-md-12">
+                    <a href="{% url 'admin_album_details' liked_album.slug %}">    
+                        <p style="text-align: center; font-size: 20px;">{{ liked_album.title }}</p>
+                    </a>    
+                    </div>
+                </div>
+            {% endfor %}
+            {% else %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <p style="text-align: center; font-size: 20px;">No Albums are liked.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div> 
+        </div>
+        <div class="col-md-4">
+            <div class="thumbnail">    
+            <h3 style="text-align: center;">Top 5 Users</h3>    
+            {% if liked_users %}
+            {% for liked_user in liked_users %}    
+                <div class="row">
+                    <div class="col-md-12">
+                    <a href="{% url 'get_userdetails' liked_user.user_id %}">        
+                        <p style="text-align: center; font-size: 20px;">{{ liked_user.name }}</p>
+                    </a>    
+                    </div>
+                </div>
+            {% endfor %}
+            {% else %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <p style="text-align: center; font-size: 20px;">No Users are liked.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div> 
+        </div>
+    </div>
+</div>
+<!-- /page content -->
+{% endblock %}   

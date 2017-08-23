@@ -1,0 +1,47 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}List genre{% endblock %}
+{% block content %}
+<div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Genre list</h3>
+              <a href="/admin/add-genre/" class="btn btn-primary btn-sm pull-right">ADD GENRE</a>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+            <table id="all_goaltable"
+                        data-toggle="table"
+                        data-url="/admin/allgenre/"
+                        data-height="500"
+                        data-side-pagination="server"
+                        data-pagination="true"
+                        data-page-list="[5, 10, 20, 50, 100, 200]"
+                        data-search="true"
+                        data-show-refresh="true"
+                        data-show-toggle="true"
+                        data-show-columns="true">
+                      <thead>
+                        <tr>
+                            <th data-field="id" data-sortable="true">Genre ID</th>
+                            <th data-field="title" data-sortable="true">Genre Title</th>
+                            <th data-field="createdate">Entry Date</th>
+                            <th data-field="details" data-formatter="show_details">Details</th>
+                        </tr>
+                        </thead>
+            </table>
+
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+        <!-- /.col -->
+
+{% endblock %}
+{% block script %}
+<script>
+    function show_details(value, row) {
+      return '<a class="btn btn-block btn-sm btn-primary" href="/admin/genre-details/'+value+'/">Details</a>';
+    }
+</script>
+{% endblock %}

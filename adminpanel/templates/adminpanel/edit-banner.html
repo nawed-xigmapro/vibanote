@@ -1,0 +1,60 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}Banner details{% endblock %}
+{% block content %}
+  <div class="col-md-12">
+     <form method="post" action="{% url 'edit_banner' %}" enctype="multipart/form-data">{% csrf_token %}
+     <input type="hidden" name="banner_id" value="{{ banner.id }}">
+              <div class="form-group">
+                <label for="title"> Title:</label>
+                <input name="title" value="{{ banner.title }}" type="text" class="form-control" id="title">
+              </div>
+              {% comment %}
+              <div class="form-group">
+                <label> Sub Title:</label>
+                <input name="subtitle" value="{{ banner.subtitle }}" type="text" class="form-control" id="title">
+              </div>
+              <div class="form-group">
+                <label>Content:</label>
+                <textarea name="content" id="summernote">{{ banner.text }}</textarea>
+              </div>
+              {% endcomment %}
+              {% if banner.picture %}
+              <div class="form-group">
+                  <img src="/static/media/{{ banner.picture }}">
+             </div>
+              {% endif %}
+              <div class="form-group">
+                <label for="content">Pic:</label>
+                <input type="file" name="picture">
+              </div>
+              <button type="submit" name="btn_edit" class="btn btn-primary">Submit</button>
+              {% comment %}
+                <button type="submit" name="btn_delete" onclick="return ConfirmDelete();" class="btn btn-danger">Delete</button>
+              {% endcomment %}
+        </form>
+   </div>
+{% endblock %}
+{% comment %}
+{% block script %}
+<script>
+$(document).ready(function() {
+  $('#summernote').summernote({
+  height: 300,                 // set editor height
+  minHeight: 300,             // set minimum height of editor
+  maxHeight: null,             // set maximum height of editor
+  focus: true                  // set focus to editable area after initializing summernote
+});
+});
+</script>
+<script>
+function ConfirmDelete()
+{
+  var x = confirm("Are you sure you want to delete?");
+  if (x)
+      return true;
+  else
+    return false;
+}
+</script>
+{% endblock %}
+{% endcomment %}

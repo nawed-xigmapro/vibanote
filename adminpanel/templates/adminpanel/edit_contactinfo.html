@@ -1,0 +1,24 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}Contact Info{% endblock %}
+{% block content %}
+  <div class="col-md-12">
+     <form method="post" action="/admin/editcontactinfo/">{% csrf_token %}
+     <input type="hidden" name="contact_info_id" value="{{ contactinfo.id }}">
+              <div class="form-group">
+                <label>Email:</label>
+                <input name="email" value="{{ contactinfo.email }}" type="email" class="form-control">
+              </div>
+              <div class="form-group">
+                <label>Phone:</label>
+                <input name="phone" value="{{ contactinfo.phone }}" type="text" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="content">Address:</label>
+                <textarea name="address" style="margin: 0px; width: 100%; height: 80px;">{{ contactinfo.address }}</textarea>
+              </div>
+              
+              
+              <button type="submit" name="btn_edit" class="btn btn-primary">Submit</button>
+        </form>
+   </div>
+{% endblock %}

@@ -1,0 +1,173 @@
+from django.template import context
+from django.shortcuts import render
+from django.contrib.auth import authenticate, login
+from django.contrib.auth import logout
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+from django.contrib.auth.models import User
+from django.db import connection
+from django.utils import formats
+from adminpanel.models import *
+
+# Create your views here.
+def dictfetchall(cursor):
+    "Return all rows from a cursor as a dict"
+    columns = [col[0] for col in cursor.description]
+    return [
+        dict(zip(columns, row))
+        for row in cursor.fetchall()
+    ]
+
+def admin_login(request):
+    if 'admin_id' in request.session:
+        return HttpResponseRedirect('/admin/artists/')
+    else:
+        msg_error = ""
+        username = password = ''
+        if request.POST:
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            #print(request.POST.get('remember_me'))
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                if user.is_staff :
+                    if user.is_active:
+                        login(request, user)
+                        request.session['admin_id'] = user.id
+                        return HttpResponseRedirect('/admin/artists/')
+                    else:
+                      msg_error = "Your account is not active, please contact the site admin."
+                else:
+                    msg_error = "you are not admin!"
+            else:
+                msg_error = "Your username and/or password were incorrect."
+
+ 
+    return render(request, 'adminpanel/login.html',{'msg_error': msg_error}, context)
+
+
+def admin_logout(request):
+    logout(request)
+    return HttpResponseRedirect('/admin/login/')
+
+def artist_list(request):
+    if 'admin_id' in request.session:
+       return render(request, 'adminpanel/artist-list.html')
+    else :
+     return HttpResponseRedirect('/admin/login/') 
+ 
+def get_artist_list(request):
+        cursor = connection.cursor()
+        cursor.execute("select count(*) as total from auth_user INNER JOIN adminpanel_userprofile"
+        " ON auth_user.id = adminpanel_userprofile.user_id where auth_user.id!=1")
+        
+        row = cursor.fetchone()
+        totalrows = row[0]
+        
+        order = request.GET['order']
+
+        if 'search' in request.GET and 'sort' not in request.GET :
+         column_name = 'auth_user.username'
+         srch = request.GET['search']
+         cursor.execute("select adminpanel_userprofile.name, adminpanel_userprofile.picture, auth_user.id ,auth_user.email,auth_user.username,auth_user.first_name,auth_user.last_name from auth_user INNER JOIN adminpanel_userprofile"
+         " ON auth_user.id = adminpanel_userprofile.user_id where auth_user.username like '"+srch+"%' and auth_user.id!=1 ORDER BY "+column_name+" "+order+"  LIMIT "+request.GET['limit']+" OFFSET "+ request.GET['offset'])
+
+        elif 'sort' in request.GET and 'search' in request.GET :
+            srch = request.GET['search']
+            sort = request.GET['sort']
+            if sort == "username":
+                column_name = 'auth_user.username'
+            elif sort == "email":
+                column_name = 'auth_user.email'
+            else :
+             column_name = 'adminpanel_userprofile.name'
+
+            if srch :
+              cursor.execute("select adminpanel_userprofile.name, adminpanel_userprofile.picture, auth_user.id ,auth_user.email,auth_user.username,auth_user.first_name,auth_user.last_name from auth_user INNER JOIN adminpanel_userprofile"
+              " ON auth_user.id = adminpanel_userprofile.user_id where auth_user.username like '"+srch+"%' and auth_user.id!=1 ORDER BY "+column_name+" "+order+" LIMIT "+request.GET['limit']+" OFFSET "+ request.GET['offset'])
+            else:
+             cursor.execute("select adminpanel_userprofile.name, adminpanel_userprofile.picture, auth_user.id ,auth_user.email,auth_user.username,auth_user.first_name,auth_user.last_name from auth_user INNER JOIN adminpanel_userprofile"
+             " ON auth_user.id = adminpanel_userprofile.user_id where auth_user.id!=1 ORDER BY "+column_name+" "+order+" LIMIT "+request.GET['limit']+" OFFSET "+ request.GET['offset'])
+
+        elif 'sort' in request.GET and 'search' not in request.GET:
+            sort = request.GET['sort']
+            if sort == "username":
+                column_name = 'auth_user.username'
+            elif sort == "email":
+                column_name = 'auth_user.email'
+            else :
+             column_name = 'adminpanel_userprofile.name'
+
+            cursor.execute("select adminpanel_userprofile.name, adminpanel_userprofile.picture, auth_user.id ,auth_user.email,auth_user.username,auth_user.first_name,auth_user.last_name from auth_user INNER JOIN adminpanel_userprofile"
+            " ON auth_user.id = adminpanel_userprofile.user_id where auth_user.id!=1 ORDER BY "+column_name+" "+order+" LIMIT "+request.GET['limit']+" OFFSET "+ request.GET['offset'])
+
+        else :
+         column_name = 'auth_user.id'
+         cursor.execute("select adminpanel_userprofile.name, adminpanel_userprofile.picture, auth_user.id ,auth_user.email,auth_user.username,auth_user.first_name,auth_user.last_name from auth_user INNER JOIN adminpanel_userprofile"
+         " ON auth_user.id = adminpanel_userprofile.user_id where auth_user.id!=1 ORDER BY "+column_name+" "+order+" LIMIT "+request.GET['limit']+" OFFSET "+ request.GET['offset'])
+
+        all_users = dictfetchall(cursor)
+        docs_dict = {
+            'total': totalrows,
+            'rows': [{
+                      'name': all_user['name'],
+                      'username': all_user['username'],
+                      'email': all_user['email'],
+                      'editid': all_user['id'],
+                      'id': all_user['id'],
+                      'uid': all_user['id'],
+                      'thumbnail': all_user['picture'],
+                      } for all_user in all_users]
+        }
+        return JsonResponse(docs_dict) 
+    
+def get_userdetails(request,user_id):
+    if 'admin_id' in request.session:
+            userdetails = UserProfile.objects.get(user_id=user_id)
+            current_user = User.objects.get(pk=user_id)
+            return render(request,'adminpanel/userdetails.html', {'userinfo': userdetails, 'current_user' : current_user , 'user_id' : user_id }, context)
+    else :
+       return HttpResponseRedirect('/admin/login/') 
+   
+def deactivate_users(request):
+    if 'admin_id' in request.session:
+        if request.method == 'POST':
+            block_id = request.POST.get('block_id', "NONE")
+            reason = request.POST.get('reason', "NONE")
+            if User.objects.filter(pk=block_id).exists(): 
+                    user_block=User.objects.get(pk=int(block_id))
+                    user_block.is_active = False
+                    user_block.save()
+                    user_profileblock =UserProfile.objects.get(user_id=block_id)
+                    user_profileblock.reason = reason
+                    user_profileblock.save()
+                    return HttpResponse(1) # 1 means user is blocked 
+            else:
+                return HttpResponse(0) # 0 means user not exists
+        else :
+            return HttpResponseRedirect(3) # 3 means data is not in post
+    else :
+          return HttpResponse(2) # 2 means admin is not logged in
+
+def activate_users(request):
+    if 'admin_id' in request.session:
+        if request.method == 'POST':
+            blocked_id = request.POST.get('blocked_id', "NONE")
+            if User.objects.filter(pk=blocked_id).exists(): 
+                    user_block=User.objects.get(pk=int(blocked_id))
+                    user_block.is_active = True
+                    user_block.save()
+                    user_profileblock =UserProfile.objects.get(user_id=blocked_id)
+                    user_profileblock.reason = ""
+                    user_profileblock.save()
+                    '''activate_mail=EmailTemplates.objects.get(pk=3) 
+                    t = Template(activate_mail.templatebody)
+                    c = Context({'name': user_block.first_name, 'msg_description': "Your Account is activated" })
+                    msg_html = t.render(c)
+                    send_mail("Account Activation", 'hello world again', 'nits.nawed@gmail.com', ['nits.nawed@gmail.com',user_block.email], html_message=msg_html)'''
+                    return HttpResponse(1) # 1 means user is active now 
+            else:
+                return HttpResponse(0) # 0 means user not exists
+        else :
+            return HttpResponseRedirect(3) # 3 means data is not in post
+    else :
+          return HttpResponse(2) # 2 means admin is not logged in       

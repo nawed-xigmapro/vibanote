@@ -1,0 +1,237 @@
+{% extends 'frontend/base.html' %}
+{% block title %}public album detail{% endblock %}
+{% block metasocial %}
+<meta content="IE=edge" http-equiv=X-UA-Compatible>
+<meta content="width=device-width,initial-scale=1" name=viewport>
+<meta content="IE=edge" http-equiv=X-UA-Compatible>
+<meta content="width=device-width,initial-scale=1" name=viewport>
+<meta property="og:title" id="titleogid" content="Vibanote" />
+<meta property="og:type" content="website" />
+<meta property="og:description" id="descriptionogid" content="For music lovers" />
+<meta property="og:url" id="urlogid" content="http://119.18.52.139:8000{{ request.get_full_path }}" />
+<meta property="og:image" id="imageogid" content="/media/{{album.album_image}}" />
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@VibanoteMedia">
+<meta name="twitter:url" content="http://119.18.52.139:8000{{ request.get_full_path }}">
+<meta name="twitter:title" content="Vibanote">
+<meta name="twitter:description" content="For music lovers">
+<meta name="twitter:creator" content="@VibanoteMedia">
+{% if album.album_image %}  
+    <meta name="twitter:image:src" content="/media/{{album.album_image}}" />
+{% else %}   
+    <meta name="twitter:image:src" content="/static/images/no-content.jpg" />
+{% endif %}
+<meta name="twitter:image:alt" content="Vibanote MEDIA" />
+<!--<meta name="twitter:domain" content="socialmediamarketinginc.com"> -->
+{% endblock %}
+{% block content %}
+{% load social_share %}
+<section class="inner-bg">
+    <div class="container">
+        <div class="album-banner">
+            <div class="row">
+                <div class="col-md-3 col-sm-3 text-center">
+                    <div class="album-pro-pic">
+                    {% if album.album_image %}    
+                    <img src="/media/{{album.album_image}}" alt="">
+                    {% else %}   
+                    <img src="/static/images/no-content.jpg" alt="">
+                    {% endif %}     
+                    </div>	
+                </div>
+                <div class="col-md-9 col-sm-9">
+                    <h2><span>{{album.title}}</span></h2>
+                    <h3><span>{{album_user.username}}</span></h3>
+                    <div class="album-details-share">
+                        <ul>
+                            <li><a class="ns_likeit" data-likeid='{{ album.id }}' data-liketype='album' href="javascript:void(0)"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i><span>{{ album.like_counts }}</span></a></li>
+                            <li>{% post_to_facebook object_or_url 'Facebook Share' %}</li>
+                            <li>{% post_to_twitter "" object_or_url  "Twitter Share"  %}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="inner-wrapper">
+            <div class="row">
+                <div class="col-md-9 col-sm-9">
+                    <div class="column add-bottom">
+                        <div id="mainwrap">
+                            <div id="nowPlay">
+                                <span class="text" id="npTitle"></span>
+                            </div>
+                            <div id="audiowrap">
+                                <div id="audio0">
+                                    <audio preload id="audio1" controls="controls">Your browser does not support HTML5 Audio!</audio>
+                                </div>
+                                <div id="tracks">
+                                    <a id="btnPrev">&laquo;</a>
+                                    <a id="btnNext">&raquo;</a>
+                                </div>
+                            </div>
+                            <div id="plwrap">
+                                <ul id="plList"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if related_albums %}
+                <div class="col-md-3 col-sm-3">
+                    <h3 class="related-albm-hdng">Related albums</h3>
+                    <ul class="related-albums">
+                    {% for related_album in related_albums %}    
+                        <li>
+                            <div class="related-albums-img">
+                                <a href="{% url 'public_album_details' related_album.slug %}"><img src="/media/{{ related_album.album_image }}"></a>
+                            </div>
+                            <div class="related-albums-title">
+                                <h3><a href="{% url 'public_album_details' related_album.slug %}">{{ related_album.title }}</a></h3>
+                                <h4><a href="{% url 'artist_details' related_album.userslug %}">{{ related_album.username }}</a></h4>
+                            </div>
+                        </li>
+                    {% endfor %}    
+                    </ul>
+                </div>
+               {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block script %}
+<script>
+$( document ).ready(function() {
+    
+    console.log(tracks);    
+    var album_id = '{{ album.id }}';
+    $.ajax({ // create an AJAX call...
+        data:{ album_id : album_id },
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        type: "POST",
+        url: '/public-album-tracks/', // the file to call
+        success: function(response) { // on success..
+            if(response){
+                console.log(JSON.parse(response));  
+                var supportsAudio = !!document.createElement('audio').canPlayType;
+            if (supportsAudio) {
+                var index = 0,
+                    playing = false,
+                    mediaPath = '/media/',
+                    extension = '',
+                    tracks = JSON.parse(response),
+                    buildPlaylist = $.each(tracks, function(key, value) {
+                        var trackNumber = value.track,
+                            trackName = value.name,
+                            trackLength = value.length;
+                        if (trackNumber.toString().length === 1) {
+                            trackNumber = '0' + trackNumber;
+                        } else {
+                            trackNumber = '' + trackNumber;
+                        }
+                        $('#plList').append('<li><div class="plItem"><div class="plNum">' + trackNumber + '.</div><div class="plTitle">' + trackName + '</div></div></li>');
+                    }),
+                    trackCount = tracks.length,
+                    npAction = $('#npAction'),
+                    npTitle = $('#npTitle'),
+                    audio = $('#audio1').bind('play', function () {
+                        playing = true;
+                        npAction.text('Now Playing...');
+                    }).bind('pause', function () {
+                        playing = false;
+                        npAction.text('Paused...');
+                    }).bind('ended', function () {
+                        npAction.text('Paused...');
+                        if ((index + 1) < trackCount) {
+                            index++;
+                            loadTrack(index);
+                            audio.play();
+                        } else {
+                            audio.pause();
+                            index = 0;
+                            loadTrack(index);
+                        }
+                    }).get(0),
+                    btnPrev = $('#btnPrev').click(function () {
+                        if ((index - 1) > -1) {
+                            index--;
+                            loadTrack(index);
+                            if (playing) {
+                                audio.play();
+                            }
+                        } else {
+                            audio.pause();
+                            index = 0;
+                            loadTrack(index);
+                        }
+                    }),
+                    btnNext = $('#btnNext').click(function () {
+                        if ((index + 1) < trackCount) {
+                            index++;
+                            loadTrack(index);
+                            if (playing) {
+                                audio.play();
+                            }
+                        } else {
+                            audio.pause();
+                            index = 0;
+                            loadTrack(index);
+                        }
+                    }),
+                    li = $('#plList li').click(function () {
+                        var id = parseInt($(this).index());
+                        if (id !== index) {
+                            playTrack(id);
+                        }
+                    }),
+                    loadTrack = function (id) {
+                        $('.plSel').removeClass('plSel');
+                        $('#plList li:eq(' + id + ')').addClass('plSel');
+                        npTitle.text(tracks[id].name);
+                        index = id;
+                        //audio.src = mediaPath + tracks[id].file + extension;
+                        audio.src =  mediaPath + tracks[id].file ;
+                    },
+                    playTrack = function (id) {
+                        loadTrack(id);
+                        audio.play();
+                    };
+                extension = audio.canPlayType('audio/mpeg') ? '.mp3' : audio.canPlayType('audio/ogg') ? '.ogg' : '';
+                loadTrack(index);
+            }  
+           } 
+        }
+    });
+});    
+</script>
+<script>
+$( document ).ready(function() {
+    var nsthis = $('.ns_likeit');
+    nsthis.click(function() {
+        var user_id = '{{request.session.member_id}}';
+        if(user_id){ 
+        var lid = nsthis.data("likeid");
+        var ltype = nsthis.data("liketype");
+        $.ajax({ // create an AJAX call...
+            data:{ lid : lid, ltype : ltype },
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            url: '/like-it/', // the file to call
+            success: function(response) { // on success..
+                var result = JSON.parse(response);
+                if(result.Ack=="1"){
+                   nsthis.find(' span').html(result.likes);
+                   showToast(result.msg_type,result.msg); 
+                } else{
+                   showToast(result.msg_type,result.msg); 
+                } 
+            }
+        });
+      } else {
+          showToast("error","Please Logged in to like!");
+      }  
+    });
+});    
+
+</script>    
+{% endblock %}

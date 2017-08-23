@@ -1,0 +1,28 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}active inactive users{% endblock %}
+{% block content %}
+<div class="col-md-12">
+    <!-- page content -->
+    <h2 class="page-heading">Active/Inactive users</h2>  
+    
+    <div class="row">
+        <div class="col-md-6">
+            <h4 style="text-align: center;">Active users</h4>
+            <div class="thumbnail">
+                <div><h4 style="text-align: center;">Number Of Users</h4></div>
+                <div class="clearfix"></div>
+                <div><h1 style="text-align: center;">{{ active_users }}</h1></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h4 style="text-align: center;">Inactive users</h4>
+            <div class="thumbnail">
+                <div><h4 style="text-align: center;">Number Of Users</h4></div>
+                <div class="clearfix"></div>
+                <div><h1 style="text-align: center;">{{ inactive_users }}</h1></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /page content -->
+{% endblock %}    

@@ -1,0 +1,143 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}Site Videos{% endblock %}
+{% block content %}
+{% load admin_fun %}
+<div class="col-xs-12">
+    <div class="box">
+        <div class="box-header">
+            <h3 class="box-title">Videos</h3>
+            <div class="pull-right">
+             
+            {% if user_id %}    
+                {% if likes_order %}
+                    {% if likes_order == "asc" %}
+                        <a class="btn btn-primary" href="{% url 'user_videos_order' user_id 'desc' %}">Sort by likes</a>
+                    {% endif %} 
+                    {% if likes_order == "desc" %}
+                        <a class="btn btn-primary" href="{% url 'user_videos_order' user_id 'asc' %}">Sort by likes</a>
+                    {% endif %}  
+                    {% if likes_order != "asc" and likes_order != "desc"  %}
+                        <a class="btn btn-primary" href="{% url 'user_videos' user_id %}">Sort by likes</a>
+                    {% endif %}  
+                {% else %}  
+                    <a class="btn btn-primary" href="{% url 'user_videos_order' user_id 'asc' %}">Sort by likes</a>
+                {% endif %}    
+            {% else %} 
+                {% if likes_order %}
+                    {% if likes_order == "asc" %}
+                        <a class="btn btn-primary" href="{% url 'videos_order' 'desc' %}">Sort by likes</a>
+                    {% endif %} 
+                    {% if likes_order == "desc" %}
+                        <a class="btn btn-primary" href="{% url 'videos_order' 'asc' %}">Sort by likes</a>
+                    {% endif %}  
+                    {% if likes_order != "asc" and likes_order != "desc"  %}
+                        <a class="btn btn-primary" href="{% url 'videos' %}">Sort by likes</a>
+                    {% endif %}  
+                {% else %}  
+                    <a class="btn btn-primary" href="{% url 'videos_order' 'asc' %}">Sort by likes</a>
+                {% endif %} 
+            {% endif %}
+            </div>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+            {% if videos %}   
+            <div class="row">
+                {% for video in videos %}
+                <div class="col-md-3">
+                    <div class="image view view-first">
+                        <iframe width="200" height="200" src="{{ video.link }}" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                    {% if video.dedicate %}
+                        {% get_tags video.dedicate as showtags %}
+                        <div class="tags">
+                        <div class="tags-content">
+                        <h2><i class="fa fa-heart" aria-hidden="true"></i> This video is dedicated to :</h2>        
+                            {% for showtag in showtags %}
+                                <span><a href="#{{showtag}}">{{showtag}}</a></span> 
+                                {% endfor %}
+                        </div>           
+                        </div>  
+                    {% endif %} 
+                    <div class="caption">
+                       <div>
+                            <a href="{% url 'admin_video_details' video.slug %}">{{ video.title }}</a>
+                        </div>
+                        <div>
+                                {% userdetails video.uploadby_id as artist_video %}  
+                                <a style="color: black;font-style: italic;" href="{% url 'get_userdetails' artist_video.user_id %}">Artist-&nbsp;{{artist_video.name}}</a>
+                        </div> 
+                        <p>Likes :&nbsp; <b>{{video.like_counts}}</b></p>
+                        <p>
+                            <a onclick="disapprove_video({{video.id}})" class="btn btn-primary" href='javascript:void(0)'>Disapprove</a>
+                            <a onclick="delete_video({{video.id}})" class="btn btn-danger" href='javascript:void(0)'>Delete</a>
+                            <a class="btn btn-success" href="{% url 'admin_video_details' video.slug %}">Edit</a>
+                        </p>   
+                        <!--<p>Video SubTitle</p>-->
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="clearfix"></div>
+                <div class="pagination">
+                    <span class="step-links">
+                        {% if videos.has_previous %}
+                        <a href="?page={{ videos.previous_page_number }}">previous</a>
+                        {% endif %}
+                        <span class="current">
+                            Page {{ videos.number }} of {{ videos.paginator.num_pages }}.
+                        </span>
+                        {% if videos.has_next %}
+                        <a href="?page={{ videos.next_page_number }}">next</a>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            {% else %}
+            <div class="row">
+                <div class="col-md-12">
+                    <div style="text-align: center">No Videos</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+    function disapprove_video(video_id){
+         ajax_call("admin/disapprove-video",video_id,"disapprove");
+    }
+    function delete_video(video_id){
+        var x = confirm("Are you sure you want to delete?");
+        if (x)
+            ajax_call("admin/delete-video",video_id,"delete");
+        else
+          return false;
+    }
+    function ajax_call(url,video_id,status){
+        $.ajax({// create an AJAX call...
+            data: {video_id: video_id},
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            url: '/'+url+'/', // the file to call
+            beforeSend: function() {
+                $("#default_loader").show();
+            },
+            success: function (response) { // on success..
+                if (response == "1") {
+                   $("#default_loader").hide();
+                    if(status=="delete"){
+                       location.reload(); 
+                    } else {
+                         location.assign("/admin/pending-videos/")
+                    }
+                } else {
+                    $("#default_loader").hide();
+                    location.reload(); 
+                 }
+            }
+        });
+    }
+</script>
+{% endblock %}

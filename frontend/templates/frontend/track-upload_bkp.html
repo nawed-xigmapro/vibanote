@@ -1,0 +1,87 @@
+{% extends 'frontend/base-profile.html' %}
+{% block title %}Track upload{% endblock %}
+{% block content %}
+<!-- page content -->
+<div class="right_col" role="main">
+    <div class="x_panel">
+        <h2 class="page-heading">Upload track</h2>
+        <div class="upload-album">
+            <form method="post" action="/trackupload/" enctype="multipart/form-data">{% csrf_token %}
+                <div class="col-md-4 col-md-offset-4">
+                    <div class="form-group">
+                        <label>Track Title<span style="color: red;">*</span></label>
+                        <input name="title" type="text" class="form-control" required="">
+                    </div>
+                    <div class="form-group">
+                        <label>Track Subtitle</label>
+                        <input name="subtitle" type="text" class="form-control">
+                    </div>
+                    <div class="form-group ">
+                        <label>upload track image<span style="color: red;">*</span></label>
+                        <input id="id_track_image" name="track_image" type="file" accept="image/*" required="">
+                    </div>
+                    <div class="form-group ">
+                        <label>upload track<span style="color: red;">*</span></label>
+                        <input id="id_track_file" name="track_file" type="file" accept=".mp3,.wav,.ogg" required="">
+                    </div>
+                    <div class="form-group ">
+                        <label>Select Genre<span style="color: red;">*</span></label>
+                        <select name="genre_id" required="" class="form-control">
+                            <option value="">Select</option>
+                            {% for gen in genre %}
+                                <option value="{{gen.id}}">{{ gen.title }}</option>
+                            {% endfor%}
+                        </select>
+                    </div>
+                    <div class="form-group ">
+                        <label>Select Type<span style="color: red;">*</span></label>
+                        <select name="types_id" required="" class="form-control">
+                            <option value="">Select</option>
+                            {% for typ in types %}
+                                <option value="{{typ.id}}">{{ typ.title }}</option>
+                            {% endfor%}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Dedicate To</label>
+                            <input name="dedicate" type="text" class="tags form-control" id='tags_3' >
+                     </div>
+
+                    <div class="form-group text-center">
+                        <input type="submit" value="Upload Track" class="btn btn-danger">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="clearfix">&nbsp;</div>
+    </div>
+</div>
+<!-- /page content -->
+{% endblock %}
+{% block script %}
+<link href="/static/css/profile/jquery.tagsinput.css" rel="stylesheet">
+<script src="/static/js/profile/jquery.tagsinput.js"></script>
+<script>
+  $('#tags_3').tagsInput({width: 'auto'});
+   /* $("#id_track_image").change(function() {
+        var fileUpload = $("#id_track_image")[0];
+        var regex = new RegExp("([a-zA-Z0-9\s_\\.\-:])+(.jpg|.jpeg|.png|.gif)$");
+        if (regex.test(fileUpload.value.toLowerCase())) {
+        } else {
+            alert("Please select a valid Image file.");
+            $("#id_track_image").val('');
+        }
+    });
+    
+    $("#id_track_file").change(function() {
+        var fileUpload = $("#id_track_file")[0];
+        var regex = new RegExp("([a-zA-Z0-9\s_\\.\-:])+(.mp3|.wav|.ogg)$");
+        if (regex.test(fileUpload.value.toLowerCase())) {
+        } else {
+            alert("Allowed format mp3, wav and ogg");
+            $("#id_track_file").val('');
+        }
+    }); */
+    
+</script>
+{% endblock %}

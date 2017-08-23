@@ -1,0 +1,31 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}change email{% endblock %}
+{% block content %}
+<div class="col-md-12">
+    <!-- page content -->
+    <h2 class="page-heading">Change Admin Email</h2>  
+    <div class="upload-album">
+        <form id="id_change_email" method="post" action="{% url 'admin_change_email' %}">{% csrf_token %}
+            <div class="form-group">
+                <input class="form-control validate[required]" id="id_oldemail"  name="oldemail" placeholder="Old Email" required type="email">
+            </div>
+            <div class="form-group">
+                <input class="form-control validate[required]" id="id_newemail"  name="newemail" placeholder="New Email" required type="email">
+            </div>
+            <div class="form-group">
+                <input type="submit" name="btn-changeemail" class="btn btn-danger btn-block btn-lg" value="Change Email"/>
+            </div>         
+        </form>
+    </div>
+</div>
+
+<!-- /page content -->
+{% endblock %}
+{% block script%}
+<link href='/static/css/validationEngine.jquery.css' rel="stylesheet" type="text/css">
+<script src="/static/js/jquery.validationEngine-en.js" ></script>
+<script src="/static/js/jquery.validationEngine.js" ></script>   
+<script>
+    $("#id_change_email").validationEngine();
+</script>
+{% endblock %}

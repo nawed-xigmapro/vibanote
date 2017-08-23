@@ -1,0 +1,133 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}registration analytics{% endblock %}
+{% block content %}
+<div class="col-md-12">
+    <!-- page content -->
+    <h2 class="page-heading">Registration Analytics</h2>  
+    
+    <div class="row">
+        <div class="col-md-3">
+            <h4 style="text-align: center;">last 7 days</h4>
+            <div class="thumbnail">
+                <div><h4 style="text-align: center;">Number Of Users</h4></div>
+                <div class="clearfix"></div>
+                <div><h1 style="text-align: center;">{{ sevendays_users }}</h1></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <h4 style="text-align: center;">last 30 days</h4>
+            <div class="thumbnail">
+                <div><h4 style="text-align: center;">Number Of Users</h4></div>
+                <div class="clearfix"></div>
+                <div><h1 style="text-align: center;">{{ thirtydays_users }}</h1></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <h4 style="text-align: center;">last 90 days</h4>
+            <div class="thumbnail">
+                <div><h4 style="text-align: center;">Number Of Users</h4></div>
+                <div class="clearfix"></div>
+                <div><h1 style="text-align: center;">{{ ninetydays_users }}</h1></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <h4 style="text-align: center;">All Time</h4>
+            <div class="thumbnail">
+                <div><h4 style="text-align: center;">Number Of Users</h4></div>
+                <div class="clearfix"></div>
+                <div><h1 style="text-align: center;">{{ alltime_users }}</h1></div>
+            </div>
+        </div>
+    </div>
+    <hr/>
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Users between dates</h3>    
+            <span>
+                    <label for="from">Start Date</label>
+                    <input type="text" id="id_start_date" name="start_date">
+            </span>
+            <span>
+                    <label for="to">End Date</label>
+                    <input type="text" id="id_end_date" name="end_date">
+            </span>
+            <span>
+                <button class="btn btn-primary" type="button" id="id_filter_user">Filter</button>
+            </span>
+        </div>
+    </div>
+    <div class="row" id="id_row" style="display: none;">
+        <div class="col-md-3">
+            <h4 style="text-align: center;">Results</h4>
+            <div class="thumbnail">
+                <div><h4 id="id_msg" style="text-align: center;">Number Of Users</h4></div>
+                <div class="clearfix"></div>
+                <div><h1 id="id_count_users" style="text-align: center;"></h1></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /page content -->
+{% endblock %}    
+{% block script %}
+<script>
+jQuery( document ).ready(function( $ ) {
+ 
+    $( "#id_start_date" ).datepicker({ 
+        dateFormat: 'yy-mm-dd',
+        changeMonth: true,
+        changeYear: true,
+        yearRange: "-50:+0",
+        onSelect: function () {
+           var end_date = $('#id_end_date');
+           var minDate = $(this).datepicker('getDate');
+           end_date.datepicker('setDate', minDate);
+           end_date.datepicker('option', 'minDate', minDate);
+        }
+    });
+    $( "#id_end_date" ).datepicker({ 
+            dateFormat: 'yy-mm-dd',
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "-50:+0"
+    });
+    
+    $( "#id_filter_user" ).click(function() {
+        $("#id_row").hide();
+        var start_date = $('#id_start_date').val();
+        var end_date = $('#id_end_date').val();
+        if(start_date && end_date){
+        $.ajax({// create an AJAX call...
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: 'POST', // GET or POST
+            url: '/admin/customdates-users/', // the file to call
+            data : {'start_date':start_date,'end_date':end_date},
+            beforeSend: function () {
+                $('#default_loader').show();
+            },
+            success: function (data) { // on success..
+            $('#default_loader').hide();
+            var response = jQuery.parseJSON( data );
+            $("#id_row").show();
+            $("#id_msg").html(response.msg);
+                if (response.ack == 1) {
+                    $("#id_count_users").html(response.count); 
+                } else {
+                    $("#id_count_users").html(""); 
+                }
+                },
+            error: function (err) { // on success..
+                $("#id_row").hide();
+                $('#default_loader').hide();
+                       
+            }
+        });
+    } else {
+         alert("please select dates!");
+    }
+    });
+    
+    
+ });
+</script>
+{% endblock %}

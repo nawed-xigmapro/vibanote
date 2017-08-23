@@ -1,0 +1,270 @@
+{% load staticfiles %}
+{% load template_functions %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{% block title%}{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/loader.css"/>
+    <link href="/static/css/profile/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/profile/font-awesome.min.css" rel="stylesheet">
+    <link href="/static/css/profile/custom.min.css" rel="stylesheet">
+    <link href="/static/css/profile/style.css" rel="stylesheet">
+    <link href="/static/css/jquery.toast.min.css" rel="stylesheet">
+    <link href="/static/css/jquery-ui.css" rel="stylesheet">
+    <link href='{% static "css/summernote.css" %}' rel="stylesheet">
+  </head>
+
+  <body class="nav-md">
+      <div style="display: none;" id="default_loader" class="loading">Loading&#8230;</div>   
+    {% userdetails request.session.member_id as userinfo %}  
+    <div class="container body">
+      <div class="main_container">
+        <div class="col-md-3 left_col">
+          <div class="left_col scroll-view">
+            <div class="navbar nav_title" style="border: 0;">
+              <a href="/" class="site_title"><i class="fa fa-headphones"></i> <span>VibaNote</span></a>
+            </div>
+
+            <div class="clearfix"></div>
+
+            <!-- menu profile quick info -->
+            <div class="profile clearfix">
+              <div class="profile_pic">
+                {% if userinfo.picture %}  
+                    <img src="/media/{{ userinfo.picture }}" alt="..." class="img-circle profile_img">
+                {% else %}
+                    <img src="/static/images/no-img.jpg" alt="..." class="img-circle profile_img">
+                {% endif %}
+              </div>
+              <div class="profile_info">
+                <span>Welcome,</span>
+                <h2>{{ userinfo.name }}</h2>
+              </div>
+            </div>
+            <!-- /menu profile quick info -->
+
+            <br />
+
+            <!-- sidebar menu -->
+            <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+              <div class="menu_section">
+                <ul class="nav side-menu">
+                  <li><a><i class="fa fa-home"></i> Home <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="/profile/">Profile</a></li>
+                      <li><a href="{% url 'fontend_topfive' %}">Top Five</a></li>
+                    </ul>
+                  </li>
+                  <li><a><i class="fa fa-music" aria-hidden="true"></i> Albums <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="{% url 'my_albums' %}">My Albums</a></li>
+                      <li><a href="{% url 'user_pending_albums' %}">Pending Albums</a></li>
+                      <li><a href="{% url 'add_album' %}">Add Album </a></li>
+                    </ul>
+                  </li>
+                  <li><a><i class="fa fa-volume-up" aria-hidden="true"></i>Tracks<span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="/my-tracks/">My Tracks</a></li>
+                      <li><a href="/pending-tracks/">Pending Tracks</a></li>
+                      <li><a href="/trackupload/">Upload Tracks</a></li>
+                    </ul>
+                  </li>
+                  <li><a><i class="fa fa-video-camera" aria-hidden="true"></i> Videos <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="/my-videos/">My Videos</a></li>
+                      <li><a href="/pending-videos/">Pending Videos</a></li>
+                      <li><a href="/videoupload/">Upload Video</a></li>
+                    </ul>
+                  </li>
+                  <li><a><i class="fa fa-envelope" aria-hidden="true"></i>Messages<span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="{% url 'show_messages' %}">Inbox</a></li>
+                      <li><a href="{% url 'show_sent_messages' %}">Sent Messages</a></li>
+                    </ul>
+                  </li>
+                  <li><a><i class="fa fa-wrench" aria-hidden="true"></i> Settings <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="{% url 'change_password' %}">Change Password</a></li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+
+            </div>
+            <!-- /sidebar menu -->
+		</div>
+        </div>
+
+        <!-- top navigation -->
+        <div class="top_nav">
+          <div class="nav_menu">
+            <nav>
+              <div class="nav toggle">
+                <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+              </div>
+
+              <ul class="nav navbar-nav navbar-right">
+                <li class="">
+                  <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    {% if userinfo.picture %}  
+                      <img src="/media/{{ userinfo.picture }}" alt="">{{ userinfo.name }}
+                    {% else %}  
+                        <img src="/static/images/no-img.jpg" alt="">{{ userinfo.name }}
+                    {% endif %}    
+                    <span class=" fa fa-angle-down"></span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-usermenu pull-right">
+                    <li><a href="/dashboard/"> Dashboard</a></li>
+                    <li><a data-toggle="modal" data-target="#admincontactmodal" href="#"> Contact To Admin</a></li>
+                    <li><a href="{% url 'change_password' %}"> Change Password</a></li>
+                    <li><a href="/logout/"><i class="fa fa-sign-out pull-right"></i> Log Out</a></li>
+                  </ul>
+                </li>
+
+                
+              </ul>
+            </nav>
+          </div>
+        </div>
+        <!-- /top navigation -->
+{% block content %}{% endblock %}
+<!-- contact modal start -->
+{% userdetails 1 as contactadmininfo %}  
+<div class="modal fade signin-modal conmodal" id="admincontactmodal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div id="logbox">
+                    <form role="form" id="frm_contactadmin" method="post" enctype="multipart/form-data">
+                        <h3>Compose Message</h3>
+                        <div class="form-group">
+                            <label>Subject<span style="color: red;">*</span></label>
+                            <input value="{{messages.0.subject}}" name="subject" type="text" class="form-control" placeholder="Message Subject" required="">
+                        </div>
+                        <div class="form-group">
+                            <label>Message Body<span style="color: red;">*</span></label>
+                            <textarea  name="body" placeholder="Message Body" class="form-control cl_summernote" required=""></textarea>
+                        </div>
+                        <div class="form-group text-center">
+                            <input type="hidden" name="touser_id" value="{{ contactadmininfo.user_id }}">
+                            <input type="hidden" name="fromuser_id" value="{{ userinfo.user_id }}">
+                            <input type="hidden" name="thread_id" value="0">
+                            <button class="btn btn-danger" type="button" id="id_adminbtnsend">Send</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+</div>
+<!-- contact modal end -->
+<!-- footer content -->
+        <footer>
+          <div class="pull-right">
+             Admin Template by <a href="/dashboard/"> Vibanote</a>
+          </div>
+          <div class="clearfix"></div>
+        </footer>
+        <!-- /footer content -->
+      </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="/static/js/profile/jquery.min.js"></script>
+    <script src="/static/js/jquery-ui.js"></script>
+    <script src="/static/js/profile/bootstrap.min.js"></script>
+    <script src="/static/js/profile/fastclick.js"></script>
+    <script src="/static/js/profile/skycons.js"></script>
+    <script src="/static/js/profile/date.js"></script>
+    <script src="/static/js/jquery.toast.min.js"></script> 
+    <script src="/static/js/profile/custom.min.js"></script>
+    <script src='{% static "js/summernote.js" %}'></script>
+<script>
+function showToast(type,msg){
+        $.toast({
+            heading: type,
+            text: msg,
+            icon: type,
+            position: 'top-center', 
+            showHideTransition: 'slide'
+        }); 
+}  
+</script>
+<script>
+$('.cl_summernote').summernote({
+      minHeight: 200,            
+      focus: true
+});
+</script>
+<script>
+$( "#id_adminbtnsend" ).click(function( event ) {
+           var fd = new FormData($("#frm_contactadmin")[0]);  
+           var promise = send_message(fd);
+           console.log(promise);
+           promise.done(function(rsp) {
+                console.log(rsp);
+                if(rsp=="1"){
+                    $('#admincontactmodal').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    showToast("success","Message Send!");
+                } else {
+                     showToast("success","Message cannot Send!");
+                }   
+           });
+           //return false;
+    }); 
+    
+</script>
+<script>
+    function send_message(formdata){
+        return $.ajax({
+            url: "{% url 'user_send_message' %}",
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            dataType: 'json',
+            data: formdata,
+            processData: false,
+            contentType: false,
+            beforeSend: function() {
+                $("#default_loader").show();
+            },
+            success: function(data) {
+                $("#default_loader").hide();    
+                if (data=="1") {
+                    return "1";  
+                } else {
+                    return "0";    
+                }
+            }, 
+            error: function(err) {
+                $("#default_loader").hide();
+                return "0";    
+            }
+        });
+    }
+</script>
+<script>
+$("form").submit(function(){
+    $("#default_loader").show();
+});
+</script>
+{% block script%}{% endblock %}	
+{% if messages %}
+{% for message in messages %}
+<script>
+    var msg = '{{ message }}';
+    var type = '{{ message.tags }}';
+    showToast(type,msg);
+</script>
+{% endfor %}
+{% endif %}
+</body>
+</html>

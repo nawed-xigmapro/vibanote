@@ -1,0 +1,101 @@
+{% extends 'frontend/base-profile.html' %}
+{% block title %}my tracks{% endblock %}
+{% block content %}
+{% load template_functions %}
+<!-- page content -->
+<div class="right_col" role="main">
+    <div class="x_panel">
+        <h2 class="page-heading">My Tracks</h2>
+        <div class="x_content" style="display: block;">
+        {% if tracks %}   
+        <div class="row">
+            <div class="col-md-9 col-sm-9">
+                <ul class="track-details">
+                {% for track in tracks %}    
+                    <li>
+			<div class="track-detail-img">
+                            <a href="#">
+                            {% if track.track_image %}    
+                                <img style="height:80px;width: 80px;" alt="" src="/media/{{ track.track_image }}">
+                            {% else %}   
+                                <img style="height:80px;width: 80px;" src="/static/images/no-content.jpg">
+                            {% endif %}    
+                            </a>
+                        </div>
+			<div class="track-detail-content">
+                            <h4><a style="margin-left:13px;" href="{% url 'track_details' track.slug %}">{{track.title}}</a></h4>
+                            <audio controls="controls">
+                                <source src="/media/{{ track.track_file }}" type="audio/mpeg" />
+                            </audio>
+                        </div>	
+                        {% if track.dedicate %}
+                            {% get_tags track.dedicate as showtags %}
+                            <div class="tags">
+                                <div class="tags-content">
+				<h2><i class="fa fa-heart" aria-hidden="true"></i> This song is dedicated to :</h2>
+                                {% for showtag in showtags %}
+                                   <span><a href="#{{showtag}}">{{showtag}}</a></span> 
+                                   {% endfor %}   
+                                </div>         
+                            </div>  
+                        {% endif %}
+		    </li>
+                {% endfor %}    
+                </ul>
+            </div>
+           <div class="clearfix"></div>
+                <div class="pagination">
+                    <span class="step-links">
+                    {% if tracks.has_previous %}
+                        <a href="?page={{ tracks.previous_page_number }}">previous</a>
+                    {% endif %}
+                    <span class="current">
+                        Page {{ tracks.number }} of {{ tracks.paginator.num_pages }}.
+                    </span>
+                    {% if tracks.has_next %}
+                        <a href="?page={{ tracks.next_page_number }}">next</a>
+                    {% endif %}
+                     </span>
+                </div>
+        </div>
+        {% else %}
+        <div class="row">
+            <div class="col-md-12">
+                <div style="text-align: center">
+                <p>Waiting for your first track eagerly..Kindly Upload</p>
+                <p><a class="btn btn-success" href="{% url 'upload_tracks' %}">Upload Track</a></p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        </div>
+    </div>
+
+</div>
+<!-- /page content -->
+{% endblock %}
+{% block script %}
+<style>
+.track-details {
+    display: block;
+    margin: 0;
+    padding: 0;
+}    
+.track-details li {
+    display: inline-block;
+    margin-bottom: 15px;
+    width: 100%;
+    border-bottom: 1px solid #e6e5e5;
+    padding-bottom: 15px;
+}
+.track-detail-content {
+    width: calc(100% - 80px);
+    float: left;
+    padding-left: 15px;
+}
+.track-detail-img {
+    width: 80px;
+    float: left;
+}
+</style>
+{% endblock %}

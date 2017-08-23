@@ -1,0 +1,82 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}Feedback Details{% endblock %}
+{% block content %}
+    <div class="col-md-12">
+     <div class="box box-warning">
+            <div class="box-header with-border">
+              <h3 class="box-title">Details</h3>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                
+             <form role="form" method="post">
+                <!-- text input -->
+                <div class="form-group">
+                  <label>Name</label>
+                  <input name="name" type="text" placeholder="Name" value="{{ feedback.name }}" class="form-control" required>
+                </div>
+                <div class="form-group">
+                   <label>Email ID</label>
+                   <input name="email" type="email" placeholder="Email ID" value="{{ feedback.email }}" class="form-control" readonly>
+                </div>
+                
+                <div class="form-group">
+                   <label>Contact No</label>
+                   <input name="contactno" type="text" placeholder="Username" value="{{ feedback.contactno }}" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                   <label>Feedback</label>
+                   <textarea class="form-control" name="feedback_text"  placeholder="Address">{{ feedback.feedback_text }}</textarea>
+                </div>
+                <input type="hidden" name="feedback_id" value="{{ feedback.id }}">
+            </form>
+             <button data-delid="{{ feedback.id }}" class="btn btn-block btn-sm btn-danger ns_delete">Delete</button>   
+            </div>
+            <!-- /.box-body -->
+          </div>
+      
+   </div>
+{% endblock %}
+{% block script %}
+<script>
+$( document ).on( "click", ".ns_delete", function() {
+        var x = confirm("Are you sure you want to delete?");
+        if (x){
+            var feedback_id = $(this).data('delid');
+            $.ajax({
+                url: "{% url 'delete_feedback' %}",
+                headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                type: "POST",
+                dataType: 'json',
+                data: {'feedback_id':feedback_id},
+                beforeSend: function() {
+                    $("#default_loader").show();
+                },
+                success: function(data) {
+                    $("#default_loader").hide();  
+
+                    if(data.ack=="1"){
+                        showToast(data.msg_type,data.msg); 
+                        setTimeout(function(){ 
+                            location.assign("{% url 'list_feedbacks' %}");
+                        }, 3000);
+                    } else{
+                        showToast(data.msg_type,data.msg); 
+                    } 
+                }, 
+                error: function(data) {
+                    $("#default_loader").hide();
+                    showToast(data.msg_type,data.msg); 
+                }
+            }); 
+            
+        }    
+    else {
+        return false; 
+    }
+           
+});
+</script>
+{% endblock %}
+
+ 

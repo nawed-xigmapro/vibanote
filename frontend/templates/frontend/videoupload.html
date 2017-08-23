@@ -1,0 +1,73 @@
+{% extends 'frontend/base-profile.html' %}
+{% block title %}Video upload{% endblock %}
+{% block content %}
+<!-- page content -->
+<div class="right_col" role="main">
+    <div class="x_panel">
+        <h2 class="page-heading">Upload Video</h2>
+        <div class="upload-album">
+            <form method="post" action="/videoupload/">{% csrf_token %}
+                <div class="col-md-4 col-md-offset-4">
+                    <div class="form-group">
+                        <label>Video Title<span style="color: red;">*</span></label>
+                        <input name="title" type="text" class="form-control" required="">
+                    </div>
+                    <div class="form-group">
+                        <label>Video Subtitle</label>
+                        <input name="subtitle" type="text" class="form-control">
+                    </div>
+                    <div class="form-group ">
+                        <label>Youtube Link<span style="color: red;">*</span></label>
+                        <input name="link" type="url" class="form-control" required="">
+                        <p>paste You tube url like : https://www.youtube.com/watch?v=AqumSyB4ISw</p>
+                    </div>
+                    {% comment %}
+                    <div class="form-group ">
+                        <label>Artist Name </label>
+                        <input name="artist_name" type="text" class="form-control">
+                    </div>
+                    {% endcomment %}
+                    <div class="form-group ">
+                        <label>Select Genre<span style="color: red;">*</span></label>
+                        <select name="genre_id" required="" class="form-control">
+                            <option value="">Select</option>
+                            {% for gen in genre %}
+                                <option value="{{gen.id}}">{{ gen.title }}</option>
+                            {% endfor%}
+                        </select>
+                    </div>
+                    <div class="form-group ">
+                        <label>Select Type<span style="color: red;">*</span></label>
+                        <select name="types_id" required="" class="form-control">
+                            <option value="">Select</option>
+                            {% for typ in types %}
+                                <option value="{{typ.id}}">{{ typ.title }}</option>
+                            {% endfor%}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Dedicate To</label>
+                            <input name="dedicate" type="text" class="tags form-control" id='tags_3' >
+                        {% comment %} 
+                        <input name="dedicated" type="text" data-role="tagsinput" class="tags form-control" id="id_dedications">
+                        {% endcomment %}
+                    </div>
+
+                    <div class="form-group text-center">
+                        <input type="submit" value="Upload Video" class="btn btn-danger">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="clearfix">&nbsp;</div>
+    </div>
+</div>
+<!-- /page content -->
+{% endblock %}
+{% block script %}
+<link href="/static/css/profile/jquery.tagsinput.css" rel="stylesheet">
+<script src="/static/js/profile/jquery.tagsinput.js"></script>
+<script>
+  $('#tags_3').tagsInput({width: 'auto',});
+ </script>
+{% endblock %}

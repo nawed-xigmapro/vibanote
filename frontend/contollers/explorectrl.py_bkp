@@ -1,0 +1,27 @@
+from django.shortcuts import render
+from django.template import context,Template,Context
+from adminpanel.models import *
+from frontend.contollers.commonctrl import *
+from django.contrib import messages
+from django.http import HttpResponseRedirect,HttpResponse
+from django.db import connection
+
+def show_tracks_videos(request,template='frontend/explore.html',page_template='frontend/explore-paginate.html'):
+    cursor = connection.cursor()
+    cursor.execute("select usr.username as userslug, up.name as username,at.* from adminpanel_userprofile as up INNER JOIN adminpanel_tracks as at"+
+    " ON up.user_id = at.uploadby_id" 
+    " INNER JOIN auth_user as usr ON usr.id = at.uploadby_id where at.is_approved = 1 and usr.is_active = 1 ORDER BY at.id DESC" )
+    tracks = dictfetchall(cursor)
+        
+    cursor = connection.cursor()
+    cursor.execute("select usr.username as userslug, up.name as username,av.* from adminpanel_userprofile as up INNER JOIN adminpanel_video as av"+
+    " ON up.user_id = av.uploadby_id"
+    " INNER JOIN auth_user as usr ON usr.id = av.uploadby_id where av.is_approved = 1 and usr.is_active = 1 ORDER BY av.id DESC" )
+    videos = dictfetchall(cursor)
+    
+    context = {
+        'tracks': tracks,'videos':videos,'page_template': page_template
+    }
+    
+    return render(request, template, context)
+

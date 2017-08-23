@@ -1,0 +1,25 @@
+{% extends 'frontend/base-profile.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<!-- page content -->
+        <div class="right_col" role="main">
+          
+			<div class="panel-heading text-center bg-info">
+				<div class="overlay_prof"></div>
+				<div class="profile_info">
+					<div class="profile-image">
+					  {% if userinfo.picture %}
+					  <img src="/media/{{ userinfo.picture }}" alt="" class="img100_100 img-circle">
+					  {% else %}
+                                            <img src="/static/images/no-img.jpg" alt="" class="img100_100 img-circle">
+                                          {% endif %}
+					</div>
+					<h3>{{ userinfo.name }}</h3>
+                                        {% if userinfo.description %}
+                                            <h5>{{ userinfo.description }}</h5>
+                                        {% endif %}    
+				</div>
+			</div>
+        </div>
+<!-- /page content -->
+{% endblock %}

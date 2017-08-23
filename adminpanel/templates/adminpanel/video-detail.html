@@ -1,0 +1,89 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}Edit Video{% endblock %}
+{% block content %}
+{% load admin_fun %}
+  <div class="col-md-12">
+     <form method="post" action="/admin/video-edit/">{% csrf_token %}
+                
+                    <div class="form-group">
+                        <label>Video Title<span style="color: red;">*</span></label>
+                        <input name="title" value="{{ video.title }}" type="text" class="form-control" required="">
+                    </div>
+                    <div class="form-group">
+                     <label>
+                        {% userdetails video.uploadby_id as artist_video %}  
+                        <a style="color: black;font-style: italic;" href="{% url 'get_userdetails' artist_video.user_id %}">Artist-&nbsp;{{artist_video.name}}</a>    
+                     </label>   
+                    </div>
+                    <div class="form-group">
+                        <label>Video Subtitle</label>
+                        <input name="subtitle" value="{{ video.subtitle }}" type="text" class="form-control">
+                    </div>
+                    <div class="form-group">
+                       <iframe width="640" height="320" src="{{ video.link }}" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                    <div class="form-group ">
+                        <label>Youtube Link<span style="color: red;">*</span></label>
+                        <input name="link" value="{{ video.link_url }}" type="url" class="form-control" required="">
+                    </div>
+                    {% comment %}
+                    <div class="form-group ">
+                        <label>Artist Name </label>
+                        <input name="artist_name" type="text" class="form-control">
+                    </div>
+                    {% endcomment %}
+                    <div class="form-group ">
+                        <label>Select Genre<span style="color: red;">*</span></label>
+                        <select name="genre_id" required="" class="form-control">
+                            <option value="">Select</option>
+                            {% for gen in genre %}
+                                <option value="{{gen.id}}" {% if video.genre_id == gen.id %}selected{% endif%}>{{ gen.title }}</option>
+                            {% endfor%}
+                        </select>
+                    </div>
+                    <div class="form-group ">
+                        <label>Select Type<span style="color: red;">*</span></label>
+                        <select name="types_id" required="" class="form-control">
+                            <option value="">Select</option>
+                            {% for typ in types %}
+                                <option value="{{typ.id}}" {% if video.types_id == typ.id %}selected{% endif%}>{{ typ.title }}</option>
+                            {% endfor%}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Dedicate To</label>
+                        <input value="{{ video.dedicate }}" name="dedicate" type="text" class="tags form-control" id='tags_3' >
+                    </div>
+
+                    <div class="form-group">
+                        <input type="hidden" value="{{ video.id }}" name="video_id">
+                        <input name="btn_edit" type="submit" value="Edit Video" class="btn btn-danger">
+                        {% if video.is_approved == 0 %}
+                            <button name="btn_approve" class="btn btn-danger">Approve video</button>
+                        {% else %}
+                            <button name="btn_disapprove" class="btn btn-danger">Disapprove video</button>
+                        {% endif %}
+                        <button name="btn_delete" onclick="return ConfirmDelete()" class="btn btn-danger">Delete</button>
+                    </div>
+                
+            </form>
+   </div>
+{% endblock %}
+{% block script %}
+<style>
+.tag span{ color: white; }
+</style>
+<link href="/static/css/profile/jquery.tagsinput.css" rel="stylesheet">
+<script src="/static/js/profile/jquery.tagsinput.js"></script>
+<script>
+$('#tags_3').tagsInput({width: 'auto'});    
+function ConfirmDelete()
+{
+  var x = confirm("Are you sure you want to delete?");
+  if (x)
+      return true;
+  else
+    return false;
+}
+</script>
+{% endblock %}

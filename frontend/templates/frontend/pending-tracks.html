@@ -1,0 +1,98 @@
+{% extends 'frontend/base-profile.html' %}
+{% block title %}pending tracks{% endblock %}
+{% block content %}
+{% load template_functions %}
+<!-- page content -->
+<div class="right_col" role="main">
+    <div class="x_panel">
+        <h2 class="page-heading">waiting for Aproval</h2>
+        <div class="x_content" style="display: block;">
+        {% if pending_tracks %}   
+        <div class="row">
+            <div class="col-md-9 col-sm-9">
+                <ul class="track-details">
+                {% for pending_track in pending_tracks %}    
+                    <li>
+			<div class="track-detail-img">
+                            <a href="#">
+                            {% if pending_track.track_image %}    
+                                <img style="height:80px;width: 80px;" alt="" src="/media/{{ pending_track.track_image }}">
+                            {% else %}   
+                                <img style="height:80px;width: 80px;" src="/static/images/no-content.jpg">
+                            {% endif %}        
+                            </a>
+                        </div>
+			<div class="track-detail-content">
+                            <h4><a style="margin-left:13px;" href="{% url 'track_details' pending_track.slug %}">{{pending_track.title}}</a></h4>
+                            <audio controls="controls">
+                                <source src="/media/{{ pending_track.track_file }}" type="audio/mpeg" />
+                            </audio>
+                        </div>	
+                        {% if pending_track.dedicate %}
+                            {% get_tags pending_track.dedicate as showtags %}
+                            <div class="tags">
+                                <div class="tags-content">
+				<h2><i class="fa fa-heart" aria-hidden="true"></i> This song is dedicated to :</h2>
+                                {% for showtag in showtags %}
+                                   <span><a href="#{{showtag}}">{{showtag}}</a></span> 
+                                   {% endfor %}   
+                                </div>         
+                            </div>  
+                        {% endif %}
+		    </li>
+                {% endfor %}    
+                </ul>
+            </div>
+           <div class="clearfix"></div>
+                <div class="pagination">
+                    <span class="step-links">
+                    {% if pending_tracks.has_previous %}
+                        <a href="?page={{ pending_tracks.previous_page_number }}">previous</a>
+                    {% endif %}
+                    <span class="current">
+                        Page {{ pending_tracks.number }} of {{ pending_tracks.paginator.num_pages }}.
+                    </span>
+                    {% if pending_tracks.has_next %}
+                        <a href="?page={{ pending_tracks.next_page_number }}">next</a>
+                    {% endif %}
+                     </span>
+                </div>
+        </div>
+        {% else %}
+        <div class="row">
+            <div class="col-md-12">
+                <div style="text-align: center">No Pending Tracks</div>
+            </div>
+        </div>
+        {% endif %}
+        </div>
+    </div>
+
+</div>
+<!-- /page content -->
+{% endblock %}
+{% block script %}
+<style>
+.track-details {
+    display: block;
+    margin: 0;
+    padding: 0;
+}    
+.track-details li {
+    display: inline-block;
+    margin-bottom: 15px;
+    width: 100%;
+    border-bottom: 1px solid #e6e5e5;
+    padding-bottom: 15px;
+}
+.track-detail-content {
+    width: calc(100% - 80px);
+    float: left;
+    padding-left: 15px;
+}
+.track-detail-img {
+    width: 80px;
+    float: left;
+}
+</style>
+{% endblock %}

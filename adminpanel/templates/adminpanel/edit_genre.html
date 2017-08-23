@@ -1,0 +1,43 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}Edit Genre{% endblock %}
+{% block content %}
+  <div class="col-md-12">
+     <form method="post" action="/admin/edit-genre/" enctype="multipart/form-data">{% csrf_token %}
+     <input type="hidden" name="genre_id" value="{{ genre.id }}">
+              <div class="form-group">
+                <label for="title">Title:</label>
+                <input name="title" value="{{ genre.title }}" type="text" class="form-control" id="title">
+              </div>
+              <div class="form-group">
+                <label for="content">Text:</label>
+                <textarea name="text" id="summernote">{{ genre.text }}</textarea>
+              </div>
+              <button type="submit" name="btn_edit" class="btn btn-primary">Submit</button>
+              {% comment %}
+                <button type="submit" name="btn_delete" onclick="return ConfirmDelete();" class="btn btn-danger">Delete</button>
+              {% endcomment %}
+        </form>
+   </div>
+{% endblock %}
+{% block script %}
+<script>
+$(document).ready(function() {
+  $('#summernote').summernote({
+  height: 200,                 // set editor height
+  minHeight: 200,             // set minimum height of editor
+  maxHeight: null,             // set maximum height of editor
+  focus: true                  // set focus to editable area after initializing summernote
+});
+});
+</script>
+<script>
+function ConfirmDelete()
+{
+  var x = confirm("Are you sure you want to delete?");
+  if (x)
+      return true;
+  else
+    return false;
+}
+</script>
+{% endblock %}

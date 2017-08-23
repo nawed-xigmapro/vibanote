@@ -1,0 +1,96 @@
+{% extends 'frontend/base-profile.html' %}
+{% block title %}Track details{% endblock %}
+{% block content %}
+<!-- page content -->
+<div class="right_col" role="main">
+    <div class="x_panel">
+        <h2 class="page-heading">Track Details</h2>
+        <div class="upload-album">
+            <form method="post" action="/track-edit/" enctype="multipart/form-data">{% csrf_token %}
+                
+                    <div class="form-group">
+                        <label>Track Title<span style="color: red;">*</span></label>
+                        <input name="title" value="{{ track.title }}" type="text" class="form-control" required="">
+                    </div>
+                    <div class="form-group">
+                        <label>Track Subtitle</label>
+                        <input name="subtitle" value="{{ track.subtitle }}" type="text" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <div style="float:left;">
+                        {% if track.track_image %}    
+                            <img style="height:40px;width: 50px;" alt="" src="/media/{{ track.track_image }}">
+                        {% else %}   
+                            <img style="height:40px;width: 50px;" src="/static/images/no-content.jpg">
+                        {% endif %}    
+                        </div>    
+                        <audio controls="controls" style="margin-left:20px;">
+                            <source src="/media/{{ track.track_file }}" type="audio/mpeg" />
+                        </audio>
+                    </div>
+                    <div class="form-group ">
+                        <label>upload track image</label>
+                        <input id="id_track_image" name="track_image" type="file" accept="image/*">
+                    </div>
+                    <div class="form-group ">
+                        <label>upload track</label>
+                        <input id="id_track_file" name="track_file" type="file" accept=".mp3,.wav,.ogg">
+                    </div>
+                    {% if track.album_id == None  %}
+                    <div class="form-group ">
+                        <label>Select Genre<span style="color: red;">*</span></label>
+                        <select name="genre_id" class="form-control" required>
+                            <option value="">Select</option>
+                            {% for gen in genre %}
+                                <option value="{{gen.id}}" {% if track.genre_id == gen.id %}selected{% endif%}>{{ gen.title }}</option>
+                            {% endfor%}
+                        </select>
+                    </div>
+                    {% comment %}
+                    <div class="form-group ">
+                        <label>Select Type<span style="color: red;">*</span></label>
+                        <select name="types_id" class="form-control" required>
+                            <option value="">Select</option>
+                            {% for typ in types %}
+                                <option value="{{typ.id}}" {% if track.types_id == typ.id %}selected{% endif%}>{{ typ.title }}</option>
+                            {% endfor%}
+                        </select>
+                        
+                    </div>
+                    {% endcomment %}
+                    <div class="form-group">
+                        <label>Dedicate To</label>
+                        <input value="{{ track.dedicate }}" name="dedicate" type="text" class="tags form-control" id='tags_3' >
+                    </div>
+                    {% endif %}
+                    <div class="form-group">
+                        <input type="hidden" value="{{ track.id }}" name="track_id">
+                        <input name="btn_edit" type="submit" value="Edit Track" class="btn btn-danger">
+                        <button name="btn_delete" onclick="return ConfirmDelete()" class="btn btn-danger">Delete</button>
+                    </div>
+                
+            </form>
+   </div>
+ </div> 
+</div> 
+{% endblock %}
+{% block script %}
+<style>
+.tag span{ color: white; }
+</style>
+<link href="/static/css/profile/jquery.tagsinput.css" rel="stylesheet">
+<script src="/static/js/profile/jquery.tagsinput.js"></script>
+{% if track.album_id == None  %}
+    <script>$('#tags_3').tagsInput({width: 'auto'});</script>
+{% endif%}
+<script>
+function ConfirmDelete()
+{
+  var x = confirm("Are you sure you want to delete?");
+  if (x)
+      return true;
+  else
+    return false;
+}
+</script>
+{% endblock %}

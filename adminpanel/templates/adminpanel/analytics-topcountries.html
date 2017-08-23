@@ -1,0 +1,21 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}top five countries{% endblock %}
+{% block content %}
+<div class="col-md-12">
+    <!-- page content -->
+    <h2 class="page-heading">Top 5 countries</h2>  
+    
+    <div class="row">
+        {% if top_countries %}
+        {% for top_country in top_countries %}
+        <div class="col-md-3">
+            <div class="thumbnail">
+                <div><h4 style="text-align: center;">{{top_country.country_name}}</h4></div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+<!-- /page content -->
+{% endblock %}   

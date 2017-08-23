@@ -1,0 +1,136 @@
+{% extends 'frontend/base.html' %}
+{% block metasocial %}
+<meta content="IE=edge" http-equiv=X-UA-Compatible>
+<meta content="width=device-width,initial-scale=1" name=viewport>
+<meta content="IE=edge" http-equiv=X-UA-Compatible>
+<meta content="width=device-width,initial-scale=1" name=viewport>
+<meta property="og:title" id="titleogid" content="Vibanote" />
+<meta property="og:type" content="website" />
+<meta property="og:description" id="descriptionogid" content="For music lovers" />
+<meta property="og:url" id="urlogid" content="http://119.18.52.139:8000{{ request.get_full_path }}" />
+{% if track_details.track_image %}    
+    <meta property="og:image" id="imageogid" content="http://119.18.52.139:8000/media/{{track_details.track_image}}" />
+{% else %}    
+    <meta property="og:image" id="imageogid" content="http://119.18.52.139:8000/static/images/inner-banner.jpg" />
+{% endif %}    
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@VibanoteMedia">
+<meta name="twitter:url" content="http://119.18.52.139:8000{{ request.get_full_path }}">
+<meta name="twitter:title" content="Vibanote">
+<meta name="twitter:description" content="For music lovers">
+<meta name="twitter:creator" content="@VibanoteMedia">
+{% if track_details.track_image %}    
+    <meta name="twitter:image:src" content="http://119.18.52.139:8000/media/{{track_details.track_image}}" />
+{% else %}
+    <meta name="twitter:image:src" content="http://119.18.52.139:8000/static/images/inner-banner.jpg" />
+{% endif %}    
+<meta name="twitter:image:alt" content="Vibanote MEDIA" />
+{% comment %}<meta name="twitter:domain" content="socialmediamarketinginc.com"> {% endcomment %}
+{% endblock %}
+{% block title %}track detail{% endblock %}
+{% block content %}
+{% load social_share %}
+{% load template_functions %}
+
+<div class="container">
+{% comment %}
+        <div class="album-banner public-bg">
+		<div class="row">
+			<div class="col-md-3 col-sm-3 text-center">
+                            <div class="album-pro-pic">
+                            {% if track_details.picture %}    
+				<img alt="{{track_details.name}}" src="/media/{{track_details.picture}}">
+                            {% else %}
+                                <img alt="{{track_details.name}}" src="/static/images/no-content-image.png">
+                            {% endif %}
+                            </div>	
+			</div>
+			<div class="col-md-9 col-sm-9">
+				<h2><span>{{track_details.name}}</span></h2>
+			</div>
+		</div>
+	</div> 
+{% endcomment %}
+	<div class="pulic-track-detail">
+		<div class="row">
+			<div class="col-md-3 col-sm-3 col-xs-12">
+                            {% if track_details.track_image %}
+                            <img src="/media/{{track_details.track_image}}" alt="text">
+                            {% else %}    
+                            <img src="/static/images/no-content.jpg" alt="text">
+                            {% endif %}    
+			</div>
+			<div class="col-md-9 col-sm-9 col-xs-12">
+				<h2 class="tr-title">{{track_details.title}}</h2>
+                                {% comment %}<h3 class="tr-subtitle">Track Sub Title</h3>{% endcomment %}
+				<audio controls="controls">
+					<source src="/media/{{track_details.track_file}}" type="audio/mpeg">
+				</audio>
+				<div class="album-details-share">
+					<ul>
+						<li><a class="ns_likeit" data-likeid="{{track_details.id}}" data-liketype="track" href="javascript:void(0)"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i><span>{{track_details.like_counts}}</span></a></li>
+						<li>
+							<div class="facebook-this">
+								{% post_to_facebook object_or_url 'Facebook Share' %}
+							</div>
+						</li>
+						<li>
+							<div class="tweet-this">
+                                                            {% post_to_twitter "" object_or_url  "Twitter Share"  %}
+							</div>
+						</li>
+					</ul>
+				</div>
+				<h3 class="tr-subtitle"><span>Genre :</span> {{track_details.genretitle}}</h3>
+                                <h3 class="tr-subtitle"><span>Artist :</span><a style="color: #848484;" href="{% url 'artist_details' track_details.username %}">{{track_details.name}}</a></h3>
+				{% if track_details.dedicate %}
+                                {% get_tags track_details.dedicate as showtags %}
+                                <div class="tags">
+					<div class="tags-content">
+					<h2><i class="fa fa-heart" aria-hidden="true"></i> This song is dedicated to:</h2>
+                                                {% for showtag in showtags %}
+                                                    <span><a href="#{{showtag}}">{{showtag}}</a></span> 
+                                                {% endfor %} 
+					</div>          
+				</div>
+                                {% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}  
+{% block script %}
+<script>
+$( document ).ready(function() {
+    $( ".ns_likeit" ).each(function( index ) {
+    var nsthis = $( this );
+    nsthis.click(function() {
+        var user_id = '{{request.session.member_id}}';
+        if(user_id){ 
+        var lid = nsthis.data("likeid");
+        var ltype = nsthis.data("liketype");
+        //alert(ltype);
+        $.ajax({ // create an AJAX call...
+            data:{ lid : lid, ltype : ltype },
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            url: '/like-it/', // the file to call
+            success: function(response) { // on success..
+                var result = JSON.parse(response);
+                if(result.Ack=="1"){
+                   nsthis.find(' span').html(result.likes);
+                   showToast(result.msg_type,result.msg); 
+                } else{
+                   showToast(result.msg_type,result.msg); 
+                } 
+            }
+        });
+      } else {
+          showToast("error","Please Logged in to like!");
+      }  
+    });
+}); 
+});    
+
+</script>
+{% endblock %}

@@ -1,0 +1,214 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}Artist List{% endblock %}
+{% block content %}
+<div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Artists</h3>
+              <div class="pull-right">
+                  <button data-toggle="modal" data-target="#mass_mail_modal" class="btn btn-primary" type="button" name="mass_mail">Send Mass Mail</button>
+              </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+             <table id="usertable"
+               data-toggle="table"
+               data-url="/admin/all-artists/"
+               data-height="900"
+               data-side-pagination="server"
+               data-pagination="true"
+               data-page-list="[5, 10, 20, 50, 100, 200]"
+               data-search="true"
+               data-show-refresh="true"
+               data-show-toggle="true"
+               data-show-columns="true">
+            <thead>
+            <tr>
+                <th data-field="uid" data-sortable="true" >User ID</th>
+                <th data-field="thumbnail" data-formatter="imageFormatter">Pic</th>
+                <th data-field="name" data-sortable="true">Name</th>
+                <th data-field="email" data-sortable="true">Email</th>
+                <th data-field="isactive" data-sortable="true" data-formatter="isactiveFormatter">Is Active</th>
+                <th data-field="id" data-formatter="anchorFormatter">Details</th>
+                <th data-field="contact" data-formatter="contactFormatter">Contact</th>
+                <th data-field="videos" data-formatter="videoFormatter">Videos</th>
+                <th data-field="tracks" data-formatter="trackFormatter">Tracks</th>
+                <th data-field="albums" data-formatter="albumFormatter">Albums</th>
+                
+            </tr>
+            </thead>
+        </table>
+            </div>
+          </div>
+        </div>
+<!-- contact modal start -->
+<div class="modal fade signin-modal" id="contactmodal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div id="logbox">
+                    <form role="form" id="frm_contactartist" class="frm_contactartist" method="post" enctype="multipart/form-data">
+                        <h3>Compose Message</h3>
+                        <div class="form-group">
+                            <label>Subject<span style="color: red;">*</span></label>
+                            <input name="subject" type="text" class="form-control" placeholder="Message Subject" required="">
+                        </div>
+                        <div class="form-group">
+                            <label>Message Body<span style="color: red;">*</span></label>
+                            <textarea style="height: 150px;" name="body" placeholder="Message Body" class="form-control" required=""></textarea>
+                        </div>
+                        <div class="form-group text-center">
+                            <input class="cls_touser" type="hidden" name="touser_id" value="">
+                            <input type="hidden" name="fromuser_id" value="{{ request.session.admin_id }}">
+                            <input type="hidden" name="thread_id" value="0">
+                            <button onclick='message_send(this.form)' class="btn btn-danger" type="button" id="id_btnsend">Send</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- contact modal end -->    
+
+<!-- mass mail modal start -->
+<div class="modal fade signin-modal" id="mass_mail_modal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div id="logbox">
+                    <form role="form" id="frm_massmail" class="frm_massmail" method="post" enctype="multipart/form-data">
+                        <h3>Compose Message</h3>
+                        <div class="form-group">
+                            <label>Subject<span style="color: red;">*</span></label>
+                            <input id="id_subject" name="subject" type="text" class="form-control" placeholder="Message Subject" required="">
+                        </div>
+                        <div class="form-group">
+                            <label>Message Body<span style="color: red;">*</span></label>
+                            <textarea id="id_text" style="height: 150px;" name="text" placeholder="Message Body" class="form-control cl_summernote" required=""></textarea>
+                        </div>
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-danger" id="id_btnsend">Send</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- mass mail modal end -->   
+     
+{% endblock %}
+{% block script %}
+<script>
+function imageFormatter(value, row) {
+      if (value) {
+        return '<img style="border-radius : 50px; height : 50px; width : 50px;" src="/media/'+value+'" />';
+       }
+       else {
+         return '<img style="border-radius : 50px; height : 50px; width : 50px;" src="/static/images/no-img.jpg" />';  
+       }
+    }
+function anchorFormatter(value, row) {
+      return '<a class="btn btn-block btn-sm btn-primary" href="/admin/userdetails/'+value+'/">Details</a>';
+    }
+    
+function contactFormatter(value, row) {
+      return '<button data-toid="'+value+'" data-toggle="modal" class="btn btn-block btn-sm btn-primary nsmodal" >Contact</button>';
+    }    
+    
+function isactiveFormatter(value, row) {
+       if (value==1) {
+        return 'Yes';
+       }
+       else {
+         return 'No';  
+       }
+    }
+function videoFormatter(value, row) {
+   return '<a class="" href="/admin/user-videos/'+value+'/">Videos</a>'+'/'+
+           '<a class="" href="/admin/user-pending-videos/'+value+'/">Pending Videos</a>';
+}
+
+function trackFormatter(value, row) {
+   return '<a class="" href="/admin/user-tracks/'+value+'/">Tracks</a>'+'/'+
+           '<a class="" href="/admin/user-pending-tracks/'+value+'/">Pending Tracks</a>';
+}
+
+function albumFormatter(value, row) {
+   return '<a class="" href="/admin/user-albums/'+value+'/">Albums</a>/'+
+           '<a class="" href="/admin/user-pending-albums/'+value+'/">Pending Albums</a>';
+}
+    
+</script>
+<script>
+$( document ).on( "click", ".nsmodal", function() {
+        $('#contactmodal').modal('show');
+        var touser_id = $(this).data('toid');
+        $(".cls_touser").val(touser_id);
+        //alert(touser_id);
+});
+    
+function message_send(formval) {
+  if($(formval)[0].checkValidity()) {   
+    var fd = new FormData(formval);  
+    var promise = send_message(fd);
+    console.log(promise);
+    promise.done(function(rsp) {
+    console.log(rsp);
+        if(rsp=="1"){
+            $('.modal').modal('hide');
+            showToast("success","Message Send!");
+        } else {
+            showToast("success","Message cannot Send!");
+        }   
+    }); 
+  } else {
+      alert("Please fill up the forms!");
+  }
+};    
+</script>
+<script>
+$(document).ready(function() {
+  $('.cl_summernote').summernote({
+      minHeight: 200,            
+      focus: true
+});
+});    
+    
+$( "#frm_massmail" ).submit(function( event ) {
+   event.preventDefault();
+   var subject = $("#id_subject").val();
+   var text = $("#id_text").val();
+    $.ajax({
+            url: "{% url 'mass_mail_artists' %}",
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            dataType: 'json',
+            data: {'subject':subject,'text':text},
+            beforeSend: function() {
+                $("#default_loader").show();
+            },
+            success: function(data) {
+                $("#default_loader").hide();  
+                if(data.ack=="1"){
+                    showToast(data.msg_type,data.msg); 
+                    $('.cl_summernote').summernote('reset');
+                    $('#id_subject').val('');
+                    $('#mass_mail_modal').modal('hide');
+                    //$('#all_goaltable').bootstrapTable('refresh');
+                } else{
+                    showToast(data.msg_type,data.msg); 
+                    //$('#all_goaltable').bootstrapTable('refresh');
+                } 
+            }, 
+            error: function(data) {
+                $("#default_loader").hide();
+                showToast(data.msg_type,data.msg); 
+            }
+        });    
+});
+</script>
+{% endblock %}

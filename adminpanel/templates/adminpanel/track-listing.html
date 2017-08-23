@@ -1,0 +1,177 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}All Tracks{% endblock %}
+{% block content %}
+{% load admin_fun %}
+<div class="col-xs-12">
+    <div class="box">
+        <div class="box-header">
+            <h3 class="box-title">All Tracks</h3>
+            <div class="pull-right">
+             
+            {% if user_id %}    
+                {% if likes_order %}
+                    {% if likes_order == "asc" %}
+                        <a class="btn btn-primary" href="{% url 'user_tracks_order' user_id 'desc' %}">Sort by likes</a>
+                    {% endif %} 
+                    {% if likes_order == "desc" %}
+                        <a class="btn btn-primary" href="{% url 'user_tracks_order' user_id 'asc' %}">Sort by likes</a>
+                    {% endif %}  
+                    {% if likes_order != "asc" and likes_order != "desc"  %}
+                        <a class="btn btn-primary" href="{% url 'user_tracks' user_id %}">Sort by likes</a>
+                    {% endif %}  
+                {% else %}  
+                    <a class="btn btn-primary" href="{% url 'user_tracks_order' user_id 'asc' %}">Sort by likes</a>
+                {% endif %}    
+            {% else %} 
+                {% if likes_order %}
+                    {% if likes_order == "asc" %}
+                        <a class="btn btn-primary" href="{% url 'get_tracks_order' 'desc' %}">Sort by likes</a>
+                    {% endif %} 
+                    {% if likes_order == "desc" %}
+                        <a class="btn btn-primary" href="{% url 'get_tracks_order' 'asc' %}">Sort by likes</a>
+                    {% endif %}  
+                    {% if likes_order != "asc" and likes_order != "desc"  %}
+                        <a class="btn btn-primary" href="{% url 'get_tracks' %}">Sort by likes</a>
+                    {% endif %}  
+                {% else %}  
+                    <a class="btn btn-primary" href="{% url 'get_tracks_order' 'asc' %}">Sort by likes</a>
+                {% endif %} 
+            {% endif %}
+            </div>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+            {% if tracks %}   
+            <div class="row">
+                <div class="col-md-9 col-sm-9">
+                <ul class="track-details">
+                {% for track in tracks %}    
+                    <li>
+			<div class="track-detail-img">
+                            <a href="#">
+                            {% if track.track_image %}    
+                                <img style="height:80px;width: 80px;" alt="" src="/media/{{ track.track_image }}">
+                            {% else %}   
+                                <img style="height:80px;width: 80px;" src="/static/images/no-content.jpg">
+                            {% endif %}     
+                            </a>
+                        </div>
+			<div class="track-detail-content">
+                            <h4>
+                                <a style="margin-left:13px;" href="{% url 'admin_track_details' track.slug %}">{{track.title}}</a>
+                                <a onclick="disapprove_track({{track.id}})" class="btn btn-primary" href='javascript:void(0)'>Disapprove</a>
+                                <a onclick="delete_track({{track.id}})" class="btn btn-danger" href='javascript:void(0)'>Delete</a>
+                                <a class="btn btn-success" href="{% url 'admin_track_details' track.slug %}">Edit</a>
+                            </h4>
+                            <audio controls="controls">
+                                <source src="/media/{{ track.track_file }}" type="audio/mpeg" />
+                            </audio>
+                        </div>	
+                        {% if track.dedicate %}
+                            {% get_tags track.dedicate as showtags %}
+                            <div class="tags">
+                            <div class="tags-content">
+                            <h2><i class="fa fa-heart" aria-hidden="true"></i> This song is dedicated to :</h2>        
+                                {% for showtag in showtags %}
+                                    <span><a href="#{{showtag}}">{{showtag}}</a></span> 
+                                    {% endfor %}  
+                            </div>          
+                            </div>  
+                        {% endif %} 
+                        <div>
+                                {% userdetails track.uploadby_id as artist_track %}  
+                                <a style="color: black;font-style: italic;" href="{% url 'get_userdetails' artist_track.user_id %}">Artist-&nbsp;{{artist_track.name}}</a>
+                        </div> 
+                        <p>Likes :&nbsp; <b>{{track.like_counts}}</b></p>
+		    </li>
+                {% endfor %}    
+                </ul>
+            </div>
+                
+                <div class="clearfix"></div>
+                <div class="pagination">
+                    <span class="step-links">
+                        {% if tracks.has_previous %}
+                        <a href="?page={{ tracks.previous_page_number }}">previous</a>
+                        {% endif %}
+                        <span class="current">
+                            Page {{ tracks.number }} of {{ tracks.paginator.num_pages }}.
+                        </span>
+                        {% if tracks.has_next %}
+                        <a href="?page={{ tracks.next_page_number }}">next</a>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            {% else %}
+            <div class="row">
+                <div class="col-md-12">
+                    <div style="text-align: center">No Tracks</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+<style>
+.track-details {
+    display: block;
+    margin: 0;
+    padding: 0;
+}    
+.track-details li {
+    display: inline-block;
+    margin-bottom: 15px;
+    width: 100%;
+    border-bottom: 1px solid #e6e5e5;
+    padding-bottom: 15px;
+}
+.track-detail-content {
+    width: calc(100% - 80px);
+    float: left;
+    padding-left: 15px;
+}
+.track-detail-img {
+    width: 80px;
+    float: left;
+}
+</style>
+<script>
+    function disapprove_track(track_id){
+         ajax_call("admin/disapprove-track",track_id,"disapprove");
+    }
+    function delete_track(track_id){
+        var x = confirm("Are you sure you want to delete?");
+        if (x)
+            ajax_call("admin/delete-track",track_id,"delete");
+        else
+          return false;
+    }
+    function ajax_call(url,track_id,status){
+        $.ajax({// create an AJAX call...
+            data: {track_id: track_id},
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            url: '/'+url+'/', // the file to call
+            beforeSend: function() {
+                $("#default_loader").show();
+            },
+            success: function (response) { // on success..
+                if (response == "1") {
+                   $("#default_loader").hide();
+                    if(status=="delete"){
+                       location.reload(); 
+                    } else {
+                         location.assign("{% url 'get_pending_tracks' %}")
+                    }
+                } else {
+                    $("#default_loader").hide();
+                    location.reload(); 
+                 }
+            }
+        });
+    }
+</script>
+{% endblock %}

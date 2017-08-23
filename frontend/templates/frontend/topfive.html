@@ -1,0 +1,85 @@
+{% extends 'frontend/base.html' %}
+{% block title %}top contents{% endblock %}
+{% block content %}
+{% load template_functions %}
+<div class="container">
+    <div class="three-section">
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+                <div class="th-block">
+                    <h3 class="block-title"><i class="fa fa-music" aria-hidden="true"></i> top 5 track</h3>
+                    <ul>
+                        {% if liked_tracks %}
+                        {% for liked_track in liked_tracks %}
+                        <li>
+                            <a href="{% url 'public_track_detail' liked_track.slug %}"><i class="fa fa-headphones" aria-hidden="true"></i> {{liked_track.title}}
+                                <audio controls="controls">
+                                        <source src="/media/{{liked_track.track_file}}" type="audio/mpeg" />
+                                </audio>
+                            </a> 
+                            {% if liked_track.dedicate %}
+                                {% get_tags liked_track.dedicate as showtags %}
+                                <div class="tags">
+                                <div class="tags-content">
+                                <h2><i class="fa fa-heart" aria-hidden="true"></i> This song is dedicated to :</h2>    
+                                    {% for showtag in showtags %}
+                                        <span><a href="#{{showtag}}">{{showtag}}</a></span> 
+                                        {% endfor %}  
+                                </div>          
+                                </div>  
+                            {% endif %} 
+                            {% userdetails liked_track.uploadby_id as trackowner %}
+                            <a href="{% url 'artist_details' trackowner.username %}"><i class="fa fa-user-o" aria-hidden="true"></i>{{trackowner.name}}</a>
+                        </li>
+                        {% endfor %}
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-4">
+                <div class="th-block">
+                    <h3 class="block-title"><i class="fa fa-music" aria-hidden="true"></i> top 5 artists</h3>
+                    <ul>
+                        {% if browsed_users %}
+                        {% for browsed_user in browsed_users %}
+                        {% userdetails browsed_user.user_id as singleuser %}
+                            <li><a href="{% url 'artist_details' singleuser.username %}"><i class="fa fa-caret-right" aria-hidden="true"></i> {{ browsed_user.name }}</a></li>
+                        {% endfor %}
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-4">
+                <div class="th-block">
+                    <h3 class="block-title"><i class="fa fa-music" aria-hidden="true"></i> top 5 videos</h3>
+                    <div class="th-vid">
+                        <div  class="col-md-12">
+                        {% if liked_videos %}
+                        {% for liked_video in liked_videos %}
+                        <a href="{% url 'public_video_detail' liked_video.slug %}"><i class="fa fa-headphones" aria-hidden="true"></i> {{liked_video.title}}</a>
+                        <iframe style="margin-bottom: 10px;" width="100%"  src="{{liked_video.link}}" frameborder="0" allowfullscreen></iframe>
+                        {% if liked_video.dedicate %}
+                                {% get_tags liked_video.dedicate as showtags %}
+				<div class="clearfix"></div>
+                                <div class="tags">
+                                <div class="tags-content">
+                                <h2><i class="fa fa-heart" aria-hidden="true"></i> This video is dedicated to :</h2>    
+                                    {% for showtag in showtags %}
+                                        <span><a href="#{{showtag}}">{{showtag}}</a></span> 
+                                    {% endfor %}    
+                                </div>        
+                                </div>  
+                        {% endif %} 
+                        {% endfor %}
+                        {% endif %}   
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

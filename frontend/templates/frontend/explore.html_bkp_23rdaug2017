@@ -1,0 +1,332 @@
+{% extends 'frontend/base.html' %}
+{% block title %}Explore{% endblock %}
+{% block content %}
+{% load template_functions %}
+<section class="inner-bg">
+    <div class="container">
+        <div class="search-result-sec">
+            <div class="row">
+                <div class="col-md-12">
+                    <ul class="nav nav-tabs explore-tabs">
+                        <li><a data-toggle="tab" href="#explore1">Top 5</a></li>
+                        <li class="active"><a data-toggle="tab" href="#explore2">Newest</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="result-for-all">
+                        <div class="tab-content">
+                            <div id="explore1" class="tab-pane fade">
+                                <div class="three-section">
+                                    <div class="row">
+                                    {% if tracks %}
+                                        <div class="col-md-6 col-sm-6">
+                                          <div class="th-block">
+                                          <h3 class="block-title"><i class="fa fa-music" aria-hidden="true"></i> Top 5 track</h3>
+                                          <ul>
+                                             {% for track in tracks  %}
+                                                <li>
+                                                    <a href="{% url 'public_track_detail' track.slug %}"><i class="fa fa-headphones" aria-hidden="true"></i> {{track.title}}
+                                                        <audio controls="controls">
+                                                                <source src="/media/{{track.track_file}}" type="audio/mpeg" />
+                                                        </audio>
+                                                    </a> 
+                                                    <div>
+                                                        {% userdetails track.uploadby_id as trackowner %}
+                                                        <span style="margin-right: 10px;"><a href="{% url 'artist_details' trackowner.username %}"><i class="fa fa-user-o" aria-hidden="true"></i>{{trackowner.name}}</a></span>
+                                                        <span style="margin-right: 10px;"><a class="ns_likeit" data-likeid='{{ track.id }}' data-liketype='track' href="javascript:void(0)"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i><span>{{ track.like_counts }}</span></a></span>
+                                                        <span style="margin-right: 10px;">
+                                                        {% if request.session.member_id %}
+                                                            {% if request.session.member_id == trackowner.user_id %}
+                                                                <a onclick='showToast("error","cannot Message yourself!");' style="cursor: pointer;"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                                                            {% else %}
+                                                                <a class="nsmodal" href="#" data-toid="{{trackowner.user_id}}" style="cursor: pointer;"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                                                            {% endif %}    
+                                                        {% else %}    
+                                                                <a onclick='showToast("error","Please Logged in to Contact!");' style="cursor: pointer;"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                                                        {% endif %} 
+                                                        </span>
+                                                    </div>
+                                                    {% if track.dedicate %}
+                                                        {% get_tags track.dedicate as showtags %}
+                                                        <div class="tags">
+                                                        <div class="tags-content">
+                                                        <h2><i class="fa fa-heart" aria-hidden="true"></i> This song is dedicated to :</h2>    
+                                                            {% for showtag in showtags %}
+                                                                <span><a href="#{{showtag}}">{{showtag}}</a></span> 
+                                                                {% endfor %}  
+                                                        </div>          
+                                                        </div>  
+                                                    {% endif %} 
+                                                    <div class="clearfix"></div>
+                                                </li>
+                                            {% endfor %} 
+                                          </ul>  
+                                        </div>
+                                    {% else %}
+                                        <p class="total-track">No tracks available</p>
+                                    {% endif %}    
+                                    </div>  
+                                    <div class="col-md-6 col-sm-6">
+                                    <div class="th-block">
+                                    <h3 class="block-title"><i class="fa fa-music" aria-hidden="true"></i> Top 5 videos</h3>
+                                    <div class="th-vid">
+                                    <div  class="col-md-12">    
+                                        {% if videos %}
+                                        {% for video in videos %}
+                                        <a href="{% url 'public_video_detail' video.slug %}"><i class="fa fa-headphones" aria-hidden="true"></i> {{video.title}}</a>
+                                        <iframe style="margin-bottom: 10px;" width="100%"  src="{{video.link}}" frameborder="0" allowfullscreen></iframe>
+                                        
+                                        <div class="clearfix"></div>
+                                        <div>
+                                        {% userdetails video.uploadby_id as videoowner %}    
+                                        <span style="margin-right: 10px;"><a href="{% url 'artist_details' videoowner.username %}"><i class="fa fa-user-o" aria-hidden="true"></i>{{videoowner.name}}</a></span>
+                                        <span style="margin-right: 10px;"><a class="ns_likeit" data-likeid='{{ video.id }}' data-liketype='video' href="javascript:void(0)"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i><span>{{ video.like_counts }}</span></a></span>
+                                        <span style="margin-right: 10px;">
+                                            {% if request.session.member_id %}
+                                                {% if request.session.member_id == videoowner.user_id %}
+                                                    <a onclick='showToast("error","cannot Message yourself!");' style="cursor: pointer;"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                                                {% else %}
+                                                    <a class="nsmodal" href="#" data-toid="{{videoowner.user_id}}" style="cursor: pointer;"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                                                {% endif %}    
+                                            {% else %}    
+                                                <a onclick='showToast("error","Please Logged in to Contact!");' style="cursor: pointer;"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                                            {% endif %} 
+                                        </span>            
+                                        </div>            
+                                        <div class="clearfix"></div>
+                                        {% if video.dedicate %}
+                                            {% get_tags video.dedicate as showtags %}
+                                                <div class="clearfix"></div>
+                                                <div class="tags">
+                                                <div class="tags-content">
+                                                <h2><i class="fa fa-heart" aria-hidden="true"></i> This video is dedicated to :</h2>    
+                                                    {% for showtag in showtags %}
+                                                        <span><a href="#{{showtag}}">{{showtag}}</a></span> 
+                                                    {% endfor %}    
+                                                </div>        
+                                                </div>  
+                                        {% endif %} 
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="total-track">No videos available</p>
+                                    {% endif %} 
+                                            </div>
+                                        </div>
+                                    <div class="clearfix"></div>
+                                        </div>
+                                    </div>
+                                    
+                                        </div>   <!-- close of row !--> 
+                                    </div> <!-- close of threesection !-->
+                                </div> <!-- close of explore tab 1 !-->
+                                
+                                
+                                <div id="explore2" class="tab-pane fade in active">
+                                  <div class="three-section">
+                                    <div class="row">
+                                    {% if newest_tracks %}
+                                        <div class="col-md-6 col-sm-6">
+                                          <div class="th-block">
+                                          <h3 class="block-title"><i class="fa fa-music" aria-hidden="true"></i> Latest 5 track</h3>
+                                          <ul>
+                                             {% for newest_track in newest_tracks  %}
+                                                <li>
+                                                    <a href="{% url 'public_track_detail' newest_track.slug %}"><i class="fa fa-headphones" aria-hidden="true"></i> {{newest_track.title}}
+                                                        <audio controls="controls">
+                                                                <source src="/media/{{newest_track.track_file}}" type="audio/mpeg" />
+                                                        </audio>
+                                                    </a> 
+                                                    <div>
+                                                    {% userdetails newest_track.uploadby_id as trackowner %}
+                                                    <span style="margin-right: 10px;"><a href="{% url 'artist_details' trackowner.username %}"><i class="fa fa-user-o" aria-hidden="true"></i>{{trackowner.name}}</a></span>
+                                                    <span style="margin-right: 10px;"><a class="ns_likeit" data-likeid='{{ newest_track.id }}' data-liketype='track' href="javascript:void(0)"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i><span>{{ newest_track.like_counts }}</span></a></span>
+                                                    <span style="margin-right: 10px;">{% if request.session.member_id %}
+                                                        {% if request.session.member_id == trackowner.user_id %}
+                                                            <a onclick='showToast("error","cannot Message yourself!");' style="cursor: pointer;"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                                                        {% else %}
+                                                            <a class="nsmodal" href="#" data-toid="{{trackowner.user_id}}" style="cursor: pointer;"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                                                        {% endif %}    
+                                                    {% else %}    
+                                                            <a onclick='showToast("error","Please Logged in to Contact!");' style="cursor: pointer;"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                                                    {% endif %}
+                                                    </span>
+                                                    </div>
+                                                    {% if newest_track.dedicate %}
+                                                        {% get_tags newest_track.dedicate as showtags %}
+                                                        <div class="tags">
+                                                        <div class="tags-content">
+                                                        <h2><i class="fa fa-heart" aria-hidden="true"></i> This song is dedicated to :</h2>    
+                                                            {% for showtag in showtags %}
+                                                                <span><a href="#{{showtag}}">{{showtag}}</a></span> 
+                                                                {% endfor %}  
+                                                        </div>          
+                                                        </div>  
+                                                    {% endif %} 
+                                                    <div class="clearfix"></div>
+                                                </li>
+                                            {% endfor %} 
+                                          </ul>  
+                                        </div>
+                                    {% else %}
+                                        <p class="total-track">No tracks available</p>
+                                    {% endif %}    
+                                    </div>  
+                                    <div class="col-md-6 col-sm-6">
+                                    <div class="th-block">
+                                    <h3 class="block-title"><i class="fa fa-music" aria-hidden="true"></i> Latest 5 Videos</h3>
+                                    <div class="th-vid">
+                                    <div  class="col-md-12">    
+                                        {% if newest_videos %}
+                                        {% for newest_video in newest_videos %}
+                                        <a href="{% url 'public_video_detail' newest_video.slug %}"><i class="fa fa-headphones" aria-hidden="true"></i> {{newest_video.title}}</a>
+                                        <iframe style="margin-bottom: 10px;" width="100%"  src="{{newest_video.link}}" frameborder="0" allowfullscreen></iframe>
+                                        <div>
+                                        {% userdetails newest_video.uploadby_id as videoowner %}    
+                                            <span style="margin-right: 10px;"><a href="{% url 'artist_details' videoowner.username %}"><i class="fa fa-user-o" aria-hidden="true"></i>{{videoowner.name}}</a></span>
+                                            <span style="margin-right: 10px;"><a class="ns_likeit" data-likeid='{{ newest_video.id }}' data-liketype='video' href="javascript:void(0)"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i><span>{{ newest_video.like_counts }}</span></a></span>
+                                            <span style="margin-right: 10px;">
+                                                {% if request.session.member_id %}
+                                                        {% if request.session.member_id == videoowner.user_id %}
+                                                            <a onclick='showToast("error","cannot Message yourself!");' style="cursor: pointer;"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                                                        {% else %}
+                                                        <a class="nsmodal" href="#" data-toid="{{videoowner.user_id}}" style="cursor: pointer;"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                                                        {% endif %}    
+                                                {% else %}    
+                                                            <a onclick='showToast("error","Please Logged in to Contact!");' style="cursor: pointer;"><i class="fa fa-envelope" aria-hidden="true"></i></a>
+                                                {% endif %} 
+                                            </span>
+                                        </div>
+                                        {% if newest_video.dedicate %}
+                                            {% get_tags newest_video.dedicate as showtags %}
+                                                <div class="clearfix"></div>
+                                                <div class="tags">
+                                                <div class="tags-content">
+                                                <h2><i class="fa fa-heart" aria-hidden="true"></i> This video is dedicated to :</h2>    
+                                                    {% for showtag in showtags %}
+                                                        <span><a href="#{{showtag}}">{{showtag}}</a></span> 
+                                                    {% endfor %}    
+                                                </div>        
+                                                </div>  
+                                        {% endif %} 
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="total-track">No videos available</p>
+                                    {% endif %} 
+                                            </div>
+                                        </div>
+                                    <div class="clearfix"></div>
+                                        </div>
+                                    </div>
+                                    
+                                        </div>   <!-- close of row !--> 
+                                    </div> <!-- close of threesection !-->  
+                                </div> <!-- close of explore tab 3 !-->
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>    
+    </div>
+</section> 
+ <!-- contact modal start -->
+ <div class="modal fade signin-modal" id="ns_contact_modal" role="dialog">
+     <div class="modal-dialog">
+         <div class="modal-content">
+             <div class="modal-body">
+                 <button type="button" class="close" data-dismiss="modal">&times;</button>
+                 <div id="logbox">
+                     <form role="form" class="frm_contactartist" id="frm_contactartist" method="post" enctype="multipart/form-data">
+                         <h3>Compose Message</h3>
+                         <div class="form-group">
+                             <label>Subject<span style="color: red;">*</span></label>
+                             <input name="subject" type="text" class="form-control" placeholder="Message Subject" required="">
+                         </div>
+                         <div class="form-group">
+                             <label>Message Body<span style="color: red;">*</span></label>
+                             <textarea style="height: 150px;" name="body" placeholder="Message Body" class="form-control cl_summernote" required=""></textarea>
+                         </div>
+                         <div class="form-group text-center">
+                             <input type="hidden" class="cls_touser" name="touser_id" value="">
+                             <input type="hidden" name="fromuser_id" value="{{ request.session.member_id }}">
+                             <input type="hidden" name="thread_id" value="0">
+                             <button onclick='message_send(this.form)' class="btn btn-danger" type="button" id="id_btnsend">Send</button>
+                         </div>
+                     </form>
+                 </div>
+             </div>
+         </div>
+     </div>
+ </div>
+ <!-- contact modal end -->
+{% endblock %}
+{% block script %}
+<script>
+function message_send(formval) {
+  if($(formval)[0].checkValidity()) {   
+    var fd = new FormData(formval);  
+    var promise = send_message(fd);
+    console.log(promise);
+    promise.done(function(rsp) {
+    console.log(rsp);
+        if(rsp=="1"){
+            $('.modal').modal('hide');
+            showToast("success","Message Send!");
+        } else {
+            showToast("success","Message cannot Send!");
+        }   
+    }); 
+  } else {
+      alert("Please fill up the forms!");
+  }
+};
+</script>
+<script>
+    $(document).ready(function () {
+        $(".ns_likeit").each(function (index) {
+            var nsthis = $(this);
+            nsthis.click(function () {
+                var user_id = '{{request.session.member_id}}';
+                if (user_id) {
+                    var lid = nsthis.data("likeid");
+                    var ltype = nsthis.data("liketype");
+                    $.ajax({// create an AJAX call...
+                        data: {lid: lid, ltype: ltype},
+                        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                        type: "POST",
+                        url: '/like-it/', // the file to call
+                        success: function (response) { // on success..
+                            var result = JSON.parse(response);
+                            if (result.Ack == "1") {
+                                nsthis.find(' span').html(result.likes);
+                                showToast(result.msg_type, result.msg);
+                            } else {
+                                showToast(result.msg_type, result.msg);
+                            }
+                        }
+                    });
+                } else {
+                    showToast("error", "Please Logged in to like!");
+                }
+            });
+        });
+
+    });
+
+</script>
+<script>
+$('.cl_summernote').summernote({
+      minHeight: 200,            
+      focus: true
+});
+</script>
+<script>
+$( document ).on( "click", ".nsmodal", function() {
+        $('#ns_contact_modal').modal('show');
+        var touser_id = $(this).data('toid');
+        $(".cls_touser").val(touser_id);
+        //alert(touser_id);
+});
+</script>
+{% endblock %}            

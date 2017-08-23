@@ -1,0 +1,42 @@
+{% extends 'frontend/base.html' %}
+{% block title %}contact us{% endblock %}
+{% block content %}
+
+<section class="inner-bg">
+    <div class="container">
+        <div class="inner-wrapper">
+            <h3 class="static-heading">Contact Us</h3>
+            <div class="contact-page">
+                <div class="row">
+                   <!-- <div class="col-md-4 col-sm-4 text-center">
+                        <i class="fa fa-map-marker fa-4x" aria-hidden="true"></i>
+                        <p>{{ contactinfo.address }}</p>
+                    </div>-->
+                    <div class="col-md-6 col-sm-6 text-center">
+                        <a href="javascript:void(0)" data-toggle="popover" data-placement="bottom" data-content="Coming Soon" >
+						<i class="fa fa-fax fa-4x" aria-hidden="true"></i></a>
+                        <p>{{ contactinfo.phone }}</p>
+                    </div>
+                    <div class="col-md-6 col-sm-6 text-center">
+			<a href="mailto:{{ contactinfo.email }}">
+                        <i class="fa fa-envelope-open fa-4x" aria-hidden="true"></i>
+                        <p><a href="mailto:{{ contactinfo.email }}">{{ contactinfo.email }}</a></p>
+						</a>
+                    </div>
+                </div>
+            </div>	
+        </div>
+    </div>
+	
+	
+</section>
+{% endblock %}
+{% block script %}
+<script>
+$(document).ready(function(){
+    $('[data-toggle="popover"]').popover();   
+});
+</script>
+{% endblock %}
+
+

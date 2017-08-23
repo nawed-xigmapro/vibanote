@@ -1,0 +1,127 @@
+{% extends 'frontend/base.html' %}
+{% block title %}Explore{% endblock %}
+{% block content %}
+{% load template_functions %}
+{% load el_pagination_tags %}
+<section class="inner-bg">
+    <div class="container">
+        <div class="search-result-sec">
+           <div class="row">
+               <div class="col-md-12">
+                   <div class="result-for-all">
+ {% if tracks %}
+<p class="total-track">Tracks</p>
+
+<div class="alltrackholder holder"></div> 
+<div id="alltrackContainer">
+    {% paginate tracks using "tracks" %}    
+    {% for track in tracks  %}
+    <div class="single-result-for-all">
+        <div class="single-result-for-all-image">
+            <a href="#"><img src="/media/{{track.track_image}}"></a>
+        </div>
+        <div class="single-result-for-all-content">
+            <h3 class="heading-all"><a href="#">{{ track.title }}</a></h3>
+            <h4 class="sub-heading"><a class="artname" href="{% url 'artist_details' track.userslug %}">{{track.username}}</a><a href="{% url 'artist_details' track.userslug %}" class="apro">Click here to view Artist Profile <i class="fa fa-angle-right" aria-hidden="true"></i></a></h4>
+            <span class="audio">
+                <audio onended="updateCount()" controls="controls">
+                    <source src="/media/{{track.track_file}}" type="audio/mpeg" />
+                </audio>
+            </span>	
+            <div class="all-content-share">
+                <ul>
+                    <li><a class="ns_likeit" data-likeid='{{ track.id }}' data-liketype='track' href="javascript:void(0)"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i><span>{{ track.like_counts }}</span></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    <div class="clearfix"></div>
+    <div>
+        {% show_pages %}
+    </div>
+
+</div>
+{% else %}
+<p class="total-track">No tracks available</p>
+{% endif %}
+<div class="clearfix"></div>
+{% if videos %}
+
+<p class="total-track">Videos</p>
+<div class="result-for-video">
+    <div class="row">
+        <div class="allvideoholder holder"></div> 
+        <div id="allvideoContainer">    
+            {% paginate videos using "videos" %}
+            {% for video in videos %}
+            <div class="col-md-4 col-sm-4 col-xs-12">
+                <div class="single-result-for-video">
+                    <iframe width="100%" height="150" src="{{ video.link }}" frameborder="0" allowfullscreen></iframe>
+                    <h3 class="heading-all"><a href="#">{{video.title}}</a></h3>
+                    <h4 class="sub-heading">
+                        <a class="artname" href="{% url 'artist_details' video.userslug %}">{{ video.username }}</a><br/>
+                    </h4>
+                    <div class="clearfix"></div>
+                    <a href="{% url 'artist_details' video.userslug %}" class="apro">Click here to view Artist Profile <i class="fa fa-angle-right" aria-hidden="true"></i></a>
+                    <div class="all-content-share">
+                        <ul>
+                            <li><a class="ns_likeit" data-likeid='{{ video.id }}' data-liketype='video' href="javascript:void(0)"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i><span>{{ video.like_counts }}</span></a></li>
+                        </ul>
+                    </div>						
+                </div>
+            </div>
+            {% endfor %}
+            <div class="clearfix"></div>
+            <div>
+                {% show_pages %}
+            </div>
+            
+        </div>
+    </div>    
+</div>
+{% else %}
+<p class="total-track">No videos available</p>
+{% endif %}
+                   </div>
+               </div>
+           </div>
+        </div>    
+    </div>
+</section>    
+{% endblock %}
+{% block script %}
+<script>
+$( document ).ready(function() {
+ $( ".ns_likeit" ).each(function( index ) {
+    var nsthis = $( this );
+    nsthis.click(function() {
+        var user_id = '{{request.session.member_id}}';
+        if(user_id){ 
+        var lid = nsthis.data("likeid");
+        var ltype = nsthis.data("liketype");
+        $.ajax({ // create an AJAX call...
+            data:{ lid : lid, ltype : ltype },
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            url: '/like-it/', // the file to call
+            success: function(response) { // on success..
+                var result = JSON.parse(response);
+                if(result.Ack=="1"){
+                   nsthis.find(' span').html(result.likes);
+                   showToast(result.msg_type,result.msg); 
+                } else{
+                   showToast(result.msg_type,result.msg); 
+                } 
+            }
+        });
+      } else {
+          showToast("error","Please Logged in to like!");
+      }  
+    });
+});   
+    
+}); 
+
+</script>
+{% endblock %}            

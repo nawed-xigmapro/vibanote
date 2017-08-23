@@ -1,0 +1,149 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}Subscibed Users{% endblock %}
+{% block content %}
+<div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Subscribed Users</h3>
+              <div class="pull-right">
+                  <button data-toggle="modal" data-target="#contactmodal" class="btn btn-default" >Mass Mail</button>
+              </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+            <table id="all_goaltable"
+                        data-toggle="table"
+                        data-url="/admin/allnewsletter/"
+                        data-height="500"
+                        data-side-pagination="server"
+                        data-pagination="true"
+                        data-page-list="[5, 10, 20, 50, 100, 200]"
+                        data-search="true"
+                        data-show-refresh="true"
+                        data-show-toggle="true"
+                        data-show-columns="true">
+                      <thead>
+                        <tr>
+                            <th data-field="id" data-sortable="true">Newsletter ID</th>
+                            <th data-field="email" data-sortable="true">Email</th>
+                            <th data-field="subscribedate">Subscribe Date</th>
+                            <th data-field="unsubscribe" data-formatter="unsubscribeFormatter">unsubscribe</th>
+                        </tr>
+                        </thead>
+            </table>
+
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+        <!-- /.col -->
+<!-- contact modal start -->
+<div class="modal fade signin-modal" id="contactmodal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div id="logbox">
+                    <form role="form" id="frm_contactartist" class="frm_contactartist" method="post" enctype="multipart/form-data">
+                        <h3>Compose Message</h3>
+                        <div class="form-group">
+                            <label>Subject<span style="color: red;">*</span></label>
+                            <input id="id_subject" name="subject" type="text" class="form-control" placeholder="Message Subject" required="">
+                        </div>
+                        <div class="form-group">
+                            <label>Message Body<span style="color: red;">*</span></label>
+                            <textarea id="id_text" style="height: 150px;" name="text" placeholder="Message Body" class="form-control cl_summernote" required=""></textarea>
+                        </div>
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-danger" id="id_btnsend">Send</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- contact modal end -->           
+{% endblock %}
+{% block script %}
+<script>
+function unsubscribeFormatter(value, row) {
+      return '<button data-subid="'+value+'" class="btn btn-block btn-sm btn-primary nsmodal" >Unsubscribe</button>';
+}
+    
+$( document ).on( "click", ".nsmodal", function() {
+    var subscribe_id = $(this).data('subid');
+    var r = confirm("Are you sure?");
+    if (r == true) {
+        $.ajax({
+            url: "{% url 'unsubscribe_users' %}",
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            dataType: 'json',
+            data: {'subscribe_id':subscribe_id},
+            beforeSend: function() {
+                $("#default_loader").show();
+            },
+            success: function(data) {
+                $("#default_loader").hide();  
+                if(data.ack=="1"){
+                    showToast(data.msg_type,data.msg); 
+                    $('#all_goaltable').bootstrapTable('refresh');
+                } else{
+                    showToast(data.msg_type,data.msg); 
+                    $('#all_goaltable').bootstrapTable('refresh');
+                } 
+            }, 
+            error: function(data) {
+                $("#default_loader").hide();
+                showToast(data.msg_type,data.msg); 
+            }
+        });    
+    } else {
+        return false;
+    } 
+    
+});    
+
+$( "#frm_contactartist" ).submit(function( event ) {
+   event.preventDefault();
+   var subject = $("#id_subject").val();
+   var text = $("#id_text").val();
+    $.ajax({
+            url: "{% url 'mass_mail_send' %}",
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            dataType: 'json',
+            data: {'subject':subject,'text':text},
+            beforeSend: function() {
+                $("#default_loader").show();
+            },
+            success: function(data) {
+                $("#default_loader").hide();  
+                if(data.ack=="1"){
+                    showToast(data.msg_type,data.msg); 
+                    $('.cl_summernote').summernote('reset');
+                    $('#contactmodal').modal('hide');
+                    //$('#all_goaltable').bootstrapTable('refresh');
+                } else{
+                    showToast(data.msg_type,data.msg); 
+                    //$('#all_goaltable').bootstrapTable('refresh');
+                } 
+            }, 
+            error: function(data) {
+                $("#default_loader").hide();
+                showToast(data.msg_type,data.msg); 
+            }
+        });    
+});
+
+$(document).ready(function() {
+  $('.cl_summernote').summernote({
+      minHeight: 200,            
+      focus: true
+});
+});
+    
+</script>    
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}List cms{% endblock %}
+{% block content %}
+<div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">All CMS</h3>
+              <a href="/admin/create-cms/" class="btn btn-primary btn-sm pull-right">ADD CMS</a>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+            <table id="all_goaltable"
+                        data-toggle="table"
+                        data-url="/admin/allcms/"
+                        data-height="500"
+                        data-side-pagination="server"
+                        data-pagination="true"
+                        data-page-list="[5, 10, 20, 50, 100, 200]"
+                        data-search="true"
+                        data-show-refresh="true"
+                        data-show-toggle="true"
+                        data-show-columns="true">
+                      <thead>
+                        <tr>
+                            <th data-field="id" data-sortable="true">Cms ID</th>
+                            <th data-field="cms_title" data-sortable="true">Cms Title</th>
+                            <th data-field="cms_slug" data-sortable="true">Cms slug</th>
+                            <th data-field="cms_startdate">Start Date</th>
+                            <th data-field="cms_details" data-formatter="show_details">Details</th>
+                        </tr>
+                        </thead>
+            </table>
+
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+        <!-- /.col -->
+
+{% endblock %}
+{% block script %}
+<script>
+    function show_details(value, row) {
+      return '<a class="btn btn-block btn-sm btn-primary" href="/admin/cms-details/'+value+'/">Details</a>';
+    }
+</script>
+{% endblock %}

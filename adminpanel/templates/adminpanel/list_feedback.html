@@ -1,0 +1,96 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}List Feedback{% endblock %}
+{% block content %}
+<div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">Users Feedback</h3>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+            <table id="all_goaltable"
+                        data-toggle="table"
+                        data-url="/admin/allfeedback/"
+                        data-height="500"
+                        data-side-pagination="server"
+                        data-pagination="true"
+                        data-page-list="[5, 10, 20, 50, 100, 200]"
+                        data-search="true"
+                        data-show-refresh="true"
+                        data-show-toggle="true"
+                        data-show-columns="true">
+                      <thead>
+                        <tr>
+                            <th data-field="id" data-sortable="true">Feedback ID</th>
+                            <th data-field="name" data-sortable="true">Name</th>
+                            <th data-field="email" data-sortable="true">Email</th>
+                            <th data-field="contactno">Contact no</th>
+                            <th data-formatter="anchorFormatter" data-field="details">Details</th>
+                            <th data-formatter="deleteFormatter" data-field="deletefeedback">Delete</th>
+                            <th data-formatter="replyFormatter" data-field="replyfeedback">Reply</th>
+                        </tr>
+                        </thead>
+            </table>
+
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+        <!-- /.col -->
+
+{% endblock %}
+{% block script%}
+<script>
+    function anchorFormatter(value, row) {
+      return '<a class="btn btn-block btn-sm btn-primary" href="/admin/feedback-details/'+value+'/">Details</a>';
+    }
+    
+    function deleteFormatter(value, row) {
+      return '<button data-delid="'+value+'" class="btn btn-block btn-sm btn-danger ns_delete" >Delete</button>';
+    }
+    
+    function replyFormatter(value, row) {
+      return '<a class="btn btn-block btn-sm btn-primary" href="mailto:'+value+'"?subject=feedback reply">Reply</a>';
+    }
+    
+</script>
+<script>
+$( document ).on( "click", ".ns_delete", function() {
+        var x = confirm("Are you sure you want to delete?");
+        if (x){
+            var feedback_id = $(this).data('delid');
+            $.ajax({
+                url: "{% url 'delete_feedback' %}",
+                headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                type: "POST",
+                dataType: 'json',
+                data: {'feedback_id':feedback_id},
+                beforeSend: function() {
+                    $("#default_loader").show();
+                },
+                success: function(data) {
+                    $("#default_loader").hide();  
+
+                    if(data.ack=="1"){
+                        showToast(data.msg_type,data.msg); 
+                        $('#all_goaltable').bootstrapTable('refresh');
+                    } else{
+                        showToast(data.msg_type,data.msg); 
+                        $('#all_goaltable').bootstrapTable('refresh');
+                    } 
+                }, 
+                error: function(data) {
+                    $("#default_loader").hide();
+                    showToast(data.msg_type,data.msg); 
+                }
+            }); 
+            
+        }    
+    else {
+        return false; 
+    }
+           
+});
+</script>
+{% endblock %}

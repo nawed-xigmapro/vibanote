@@ -1,0 +1,661 @@
+{% load staticfiles %}
+{% load admin_fun %} 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  
+  <title>{% block title %}{% endblock %}</title>
+  <link href='{% static "css/jquery-ui.css" %}' rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" >
+  <link rel="stylesheet" href='{% static "font-awesome/css/font-awesome.min.css" %}'>
+  <link rel="stylesheet" href='{% static "css/ionicons.min.css" %}'>
+  <link rel="stylesheet" href='{% static "dist/css/AdminLTE.min.css" %}'>
+  <link rel="stylesheet" href='{% static "plugins/iCheck/square/blue.css" %}'>
+  <link rel="stylesheet" href='{% static "css/wenzhixin_bootstrap-table.css" %}'>
+  <link rel="stylesheet" href='{% static "dist/css/skins/_all-skins.min.css" %}'>
+  <link href='{% static "css/summernote.css" %}' rel="stylesheet">
+  <link href='{% static "css/loader.css" %}' rel="stylesheet">
+  <link href='{% static "css/jquery.toast.min.css" %}' rel="stylesheet">
+<style>
+.tags{
+    width:100%;
+    float:left;
+}
+.tags-content{
+    float: left;
+    padding: 5px;
+    max-width: 100%;
+    border: 1px solid #ececec;
+    background: #efefef;
+    margin-bottom: 5px;
+}
+.tags-content h2{  
+    display: inline-block;
+    margin: 0;
+    font-size: 12px;
+    color: #f95e02;
+    text-transform: uppercase;
+    font-weight: 900;
+    letter-spacing: 2px;
+}
+.tags span{
+	display:inline-block;
+	margin-right:4px;
+}
+.tags span a{
+    font-weight: bold;
+    font-size: 11px;
+    color: #ffffff;
+    background: #505050;
+    padding: 1px 8px;
+    display: inline-block;
+    border-radius: 6px;
+    letter-spacing: 1px;
+}
+
+  </style>
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div id="default_loader" style="z-index: 99999; display: none;" class="loading">Loading&#8230;</div>   
+<div class="wrapper">
+{% userdetails request.session.admin_id as userdetails %}
+  <header class="main-header">
+    <!-- Logo -->
+    <a href="#" class="logo">
+      <!-- mini logo for sidebar mini 50x50 pixels -->
+      <span class="logo-mini">VN</span>
+      <!-- logo for regular state and mobile devices -->
+      <span class="logo-lg">VibaNote</span>
+    </a>
+    <!-- Header Navbar: style can be found in header.less -->
+    <nav class="navbar navbar-static-top">
+      <!-- Sidebar toggle button-->
+      <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </a>
+
+      <div class="navbar-custom-menu">
+        <ul class="nav navbar-nav">
+            <li class="user user-menu">
+                {% get_unread_msgcount request.session.admin_id as unread_count %}
+                <a id="id_unread_count" style="color:red" href="javascript:void(0)">
+                 <i class="fa fa-envelope fa-2x" aria-hidden="true"></i>
+                 <span style="margin-left: -11px;margin-top: -25px;" class="badge">{{ unread_count }}</span>
+                </a>
+            </li>    
+          <li class="dropdown user user-menu">
+
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              {% if userdetails.thumbnail %}
+                <img src="{{ userdetails.thumbnail }}" class="user-image" alt="User Image">
+              {% else %}
+                <img src="{% static 'images/no-img.jpg' %}" alt="no_image" class="user-image">
+              {% endif %}
+              <span class="hidden-xs">{{ userdetails.first_name }}&nbsp;{{ userdetails.last_name }}</span>
+            </a>
+            <ul class="dropdown-menu">
+              <!-- User image -->
+              <li class="user-header">
+               {% if userdetails.thumbnail %}
+                <img src="{{ userdetails.thumbnail }}" class="img-circle" alt="User Image">
+              {% else %}
+                <img src="{% static 'images/no-img.jpg' %}" class="img-circle" alt="no_image">
+              {% endif %}
+
+                <p>
+                  {{ userdetails.first_name }}&nbsp;{{ userdetails.last_name }} - Admin
+                  <!--<small>Member since Nov. 2012</small> -->
+                </p>
+              </li>
+              <!-- Menu Body -->
+              <li class="user-body">
+                <div class="row"></div>
+                <!-- /.row -->
+              </li>
+              <!-- Menu Footer-->
+              <li class="user-footer">
+                <div class="pull-left">
+                  <a href="/admin/artists/" class="btn btn-default btn-flat">Artists</a>
+                </div>
+                <div class="pull-right">
+                    <a href="/admin/logout/" class="btn btn-default btn-flat">Log out</a>
+                </div>
+              </li>
+            </ul>
+          </li>
+          <!-- Control Sidebar Toggle Button -->
+          {% comment %}
+          <li>
+            <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+          </li>
+          {% endcomment %}
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+
+<!--left side bar starts  -->
+
+
+<aside class="main-sidebar">
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+      <!-- Sidebar user panel -->
+      <div class="user-panel">
+        <div class="pull-left image">
+          {% if userdetails.thumbnail %}
+                <img src="{{ userdetails.thumbnail }}" class="img-circle" alt="User Image">
+          {% else %}
+                <img src="{% static 'images/no-img.jpg' %}" class="img-circle" alt="no_image">
+          {% endif %}
+        </div>
+        <div class="pull-left info">
+          <p>{{ userdetails.first_name }}&nbsp;{{ userdetails.last_name }}</p>
+          <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+        </div>
+      </div>
+     
+      <!-- sidebar menu: : style can be found in sidebar.less -->
+      <ul class="sidebar-menu">
+        <li class="header">MAIN NAVIGATION</li>
+        
+        <li class="treeview {% if request.resolver_match.url_name == 'analytics_registration' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'analytics_user_status' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'analytics_albumuploads' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'analytics_trackuploads' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'analytics_videouploads' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'countrywise_users' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'analytics_topcountries' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'analytics_mostliked' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'analytics_mostbrowsed' %} active{% endif %}">
+          <a href="#">
+            <i class="fa fa-dashboard"></i> <span>Analytics</span> <i class="fa fa-angle-left pull-right"></i>
+          </a>
+          <ul class="treeview-menu">
+              <li class="{% if request.resolver_match.url_name == 'analytics_user_status' %} active{% endif %}
+                         {% if request.resolver_match.url_name == 'analytics_registration' %} active{% endif %}
+                         {% if request.resolver_match.url_name == 'countrywise_users' %} active{% endif %}">
+                <a href="#"><i class="fa fa-circle-o"></i> User Analytics</a>
+                <ul class="treeview-menu">
+                    
+                    <li class="{% if request.resolver_match.url_name == 'analytics_registration' %} active{% endif %}"><a href="{% url 'analytics_registration' %}"><i class="fa fa-circle-o"></i> Registrations</a></li> 
+                    <li class="{% if request.resolver_match.url_name == 'analytics_user_status' %} active{% endif %}"><a href="{% url 'analytics_user_status' %}"><i class="fa fa-circle-o"></i> Active/Inactive</a></li> 
+                    <li class="{% if request.resolver_match.url_name == 'countrywise_users' %} active{% endif %}"><a href="{% url 'countrywise_users' %}"><i class="fa fa-circle-o"></i> Country Wise</a></li> 
+                
+                </ul>
+            </li>
+            <li class="{% if request.resolver_match.url_name == 'analytics_albumuploads' %} active{% endif %}
+                       {% if request.resolver_match.url_name == 'analytics_trackuploads' %} active{% endif %}
+                       {% if request.resolver_match.url_name == 'analytics_videouploads' %} active{% endif %}">
+                <a href="#"><i class="fa fa-circle-o"></i> Upload analytics</a>
+                <ul class="treeview-menu">
+                    <li class="{% if request.resolver_match.url_name == 'analytics_albumuploads' %} active{% endif %}"><a href="{% url 'analytics_albumuploads' %}"><i class="fa fa-circle-o"></i> Albums</a></li> 
+                    <li class="{% if request.resolver_match.url_name == 'analytics_trackuploads' %} active{% endif %}"><a href="{% url 'analytics_trackuploads' %}"><i class="fa fa-circle-o"></i> Tracks</a></li> 
+                    <li class="{% if request.resolver_match.url_name == 'analytics_videouploads' %} active{% endif %}"><a href="{% url 'analytics_videouploads' %}"><i class="fa fa-circle-o"></i> Videos</a></li> 
+                </ul>
+            </li>
+            <li class="{% if request.resolver_match.url_name == 'analytics_topcountries' %} active{% endif %}
+                       {% if request.resolver_match.url_name == 'analytics_mostliked' %} active{% endif %}
+                       {% if request.resolver_match.url_name == 'analytics_mostbrowsed' %} active{% endif %}">
+                <a href="#"><i class="fa fa-circle-o"></i> Site analytics</a>
+                <ul class="treeview-menu">
+                    <li class="{% if request.resolver_match.url_name == 'analytics_topcountries' %} active{% endif %}"><a href="{% url 'analytics_topcountries' %}"><i class="fa fa-circle-o"></i> Countries</a></li> 
+                    <li class="{% if request.resolver_match.url_name == 'analytics_mostliked' %} active{% endif %}"><a href="{% url 'analytics_mostliked' %}"><i class="fa fa-circle-o"></i> Most Liked</a></li> 
+                    <li class="{% if request.resolver_match.url_name == 'analytics_mostbrowsed' %} active{% endif %}"><a href="{% url 'analytics_mostbrowsed' %}"><i class="fa fa-circle-o"></i> Most Browsed Artist</a></li> 
+                </ul>
+            </li>
+          </ul>
+        </li> 
+        
+        <li class="treeview {% comment %}{% if request.resolver_match.url_name == 'admin_profile' %} active{% endif %}{% endcomment %}
+                            {% if request.resolver_match.url_name == 'get_userdetails' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'user_videos' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'user_videos_order' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'user_pending_videos' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'user_pending_videos_order' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'user_tracks' %}active{% endif %}
+                            {% if request.resolver_match.url_name == 'user_tracks_order' %}active{% endif %}
+                            {% if request.resolver_match.url_name == 'user_pending_tracks' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'user_pending_tracks_order' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'user_albums_list' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'user_albums_list_order' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'artist_list' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'user_pending_albums_list' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'user_pending_albums_list_order' %} active{% endif %} ">
+
+          <a href="#">
+            <i class="fa fa-files-o"></i>
+            <span>Users Section</span>
+            <!--<span class="label label-primary pull-right">4</span>-->
+          </a>
+          <ul class="treeview-menu">
+              {% comment %}
+                <li class="{% if request.resolver_match.url_name == 'admin_profile' %}active{% endif %}"><a href="/admin/profile/"><i class="fa fa-circle-o"></i>Admin Profile</a></li>
+              {% endcomment %}
+              <li class="{% if request.resolver_match.url_name == 'artist_list' %}active{% endif %}"><a href="/admin/artists/"><i class="fa fa-circle-o"></i> Artists</a></li>
+             
+          </ul>
+        </li>
+        <li class="treeview {% comment %}{% if request.resolver_match.url_name == 'add_banner' %}active{% endif %}{% endcomment %}
+                            {% if request.resolver_match.url_name == 'list_banner' %}active{% endif %}
+                            {% if request.resolver_match.url_name == 'banner_details' %}active{% endif %}"> 
+            <a href="#">
+             <i class="fa fa-files-o"></i>
+             <span>Banner</span>
+             <!--<span class="label label-primary pull-right">4</span>-->
+           </a>
+            <ul class="treeview-menu">
+                {% comment %}<li class="{% if request.resolver_match.url_name == 'add_banner' %}active{% endif %}"><a href="{% url 'add_banner' %}"><i class="fa fa-circle-o"></i>Add Banner</a></li>{% endcomment %}
+                <li class="{% if request.resolver_match.url_name == 'list_banner' %}active{% endif %}"><a href="{% url 'list_banner' %}"><i class="fa fa-circle-o"></i>List Banners</a></li>
+            </ul>
+        </li>
+        <li class="treeview {% if request.resolver_match.url_name == 'admin_inbox_messages' %}active{% endif %}
+                            {% if request.resolver_match.url_name == 'admin_outbox_messages' %} active{% endif %}
+                            "> 
+           <a href="#">
+            <i class="fa fa-files-o"></i>
+            <span>Messages Section</span>
+            <!--<span class="label label-primary pull-right">4</span>-->
+          </a>
+        <ul class="treeview-menu">
+            <li class="{% if request.resolver_match.url_name == 'admin_inbox_messages' %}active{% endif %}"><a href="{% url 'admin_inbox_messages' %}"><i class="fa fa-circle-o"></i>Inbox</a></li>
+            <li class="{% if request.resolver_match.url_name == 'admin_outbox_messages' %}active{% endif %}"><a href="{% url 'admin_outbox_messages' %}"><i class="fa fa-circle-o"></i>Sent</a></li>
+        </ul>
+        </li>
+        <li class="treeview {% if request.resolver_match.url_name == 'create_cms' %}active{% endif %}
+                            {% if request.resolver_match.url_name == 'cms_details' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'list_cms' %}active{% endif %} "> 
+           <a href="#">
+            <i class="fa fa-files-o"></i>
+            <span>Cms Section</span>
+            <!--<span class="label label-primary pull-right">4</span>-->
+          </a>
+        <ul class="treeview-menu">
+            <li class="{% if request.resolver_match.url_name == 'create_cms' %}active{% endif %}"><a href="/admin/create-cms/"><i class="fa fa-circle-o"></i>Add Cms</a></li>
+            <li class="{% if request.resolver_match.url_name == 'list_cms' %}active{% endif %}"><a href="/admin/cms/"><i class="fa fa-circle-o"></i> List Cms</a></li>
+        </ul>
+        </li>
+        
+        <li class="treeview {% if request.resolver_match.url_name == 'admin_video_details' %}active{% endif %}
+                            {% if request.resolver_match.url_name == 'videos' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'videos_order' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'pending_videos_order' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'pending_videos' %}active{% endif %} "> 
+           <a href="#">
+            <i class="fa fa-files-o"></i>
+            <span>Video Section</span>
+            <!--<span class="label label-primary pull-right">4</span>-->
+          </a>
+        <ul class="treeview-menu">
+            <li class="{% if request.resolver_match.url_name == 'videos' or request.resolver_match.url_name == 'videos_order' %}active{% endif %}"><a href="/admin/videos/"><i class="fa fa-circle-o"></i>Videos</a></li>
+            <li class="{% if request.resolver_match.url_name == 'pending_videos' or request.resolver_match.url_name == 'pending_videos_order' %}active{% endif %}"><a href="/admin/pending-videos/"><i class="fa fa-circle-o"></i>Pending Videos</a></li>
+        </ul>
+        </li>
+        
+        <li class="treeview {% if request.resolver_match.url_name == 'albums_list' %}active{% endif %}
+                            {% if request.resolver_match.url_name == 'albums_list_order' %}active{% endif %}
+                            {% if request.resolver_match.url_name == 'admin_album_details' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'pending_albums_list_order' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'pending_albums_list' %} active{% endif %}"> 
+           <a href="#">
+            <i class="fa fa-files-o"></i>
+            <span>Album Section</span>
+            <!--<span class="label label-primary pull-right">4</span>-->
+          </a>
+        <ul class="treeview-menu">
+            <li class="{% if request.resolver_match.url_name == 'albums_list' or request.resolver_match.url_name == 'albums_list_order' %}active{% endif %}"><a href="{% url 'albums_list' %}"><i class="fa fa-circle-o"></i>Albums</a></li>
+            <li class="{% if request.resolver_match.url_name == 'pending_albums_list' or request.resolver_match.url_name == 'pending_albums_list_order'  %}active{% endif %}"><a href="{% url 'pending_albums_list' %}"><i class="fa fa-circle-o"></i>Pending Albums</a></li>
+        </ul>
+        </li>
+        
+        <li class="treeview {% if request.resolver_match.url_name == 'admin_track_details' %}active{% endif %}
+                            {% if request.resolver_match.url_name == 'get_pending_tracks' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'get_pending_tracks_order' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'get_tracks_order' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'get_tracks' %}active{% endif %} "> 
+           <a href="#">
+            <i class="fa fa-files-o"></i>
+            <span>Track Section</span>
+            <!--<span class="label label-primary pull-right">4</span>-->
+          </a>
+        <ul class="treeview-menu">
+            <li class="{% if request.resolver_match.url_name == 'get_tracks' or request.resolver_match.url_name == 'get_tracks_order' %}active{% endif %}"><a href="{% url 'get_tracks' %}"><i class="fa fa-circle-o"></i>Tracks</a></li>
+            <li class="{% if request.resolver_match.url_name == 'get_pending_tracks' or request.resolver_match.url_name == 'get_pending_tracks_order' %}active{% endif %}"><a href="{% url 'get_pending_tracks' %}"><i class="fa fa-circle-o"></i>Pending Tracks</a></li>
+        </ul>
+        </li>
+        
+        <li class="treeview {% if request.resolver_match.url_name == 'list_newsletter' %}active{% endif %}"> 
+           <a href="#">
+            <i class="fa fa-files-o"></i>
+            <span>NewsLetter Section</span>
+           </a>
+        <ul class="treeview-menu">
+            <li class="{% if request.resolver_match.url_name == 'list_newsletter' %}active{% endif %}"><a href="/admin/newsletter/"><i class="fa fa-circle-o"></i>Subscribed Users</a></li>
+        </ul>
+        </li>
+        <li class="treeview {% if request.resolver_match.url_name == 'contact_details' %}active{% endif %}"> 
+           <a href="#">
+            <i class="fa fa-files-o"></i>
+            <span>Contact Info Section</span>
+           </a>
+        <ul class="treeview-menu">
+            <li class="{% if request.resolver_match.url_name == 'contact_details' %}active{% endif %}"><a href="/admin/contactinfo/"><i class="fa fa-circle-o"></i>Edit Info</a></li>
+        </ul>
+        </li>
+        <li class="treeview {% if request.resolver_match.url_name == 'emailtemplates' %}active{% endif %}
+                            {% if request.resolver_match.url_name == 'edit_emailtemplates' %}active{% endif %}"> 
+           <a href="#">
+            <i class="fa fa-files-o"></i>
+            <span>Mail Templates</span>
+           </a>
+        <ul class="treeview-menu">
+            <li class="{% if request.resolver_match.url_name == 'emailtemplates' %}active{% endif %}"><a href="/admin/email-templates/"><i class="fa fa-circle-o"></i>list</a></li>
+        </ul>
+        </li>
+        
+        
+        <li class="treeview {% if request.resolver_match.url_name == 'add_genre' %}active{% endif %}
+                            {% if request.resolver_match.url_name == 'list_genre' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'genre_details' %}active{% endif %} "> 
+           <a href="#">
+            <i class="fa fa-files-o"></i>
+            <span>Genre Section</span>
+            <!--<span class="label label-primary pull-right">4</span>-->
+          </a>
+        <ul class="treeview-menu">
+            <li class="{% if request.resolver_match.url_name == 'add_genre' %}active{% endif %}"><a href="/admin/add-genre/"><i class="fa fa-circle-o"></i>Add Genre</a></li>
+            <li class="{% if request.resolver_match.url_name == 'list_genre' %}active{% endif %}"><a href="/admin/genre/"><i class="fa fa-circle-o"></i> List Genre</a></li>
+        </ul>
+        </li>
+        
+         <li class="treeview {% if request.resolver_match.url_name == 'add_type' %}active{% endif %}
+                            {% if request.resolver_match.url_name == 'list_type' %} active{% endif %}
+                            {% if request.resolver_match.url_name == 'type_details' %}active{% endif %} "> 
+           <a href="#">
+            <i class="fa fa-files-o"></i>
+            <span>Type Section</span>
+            <!--<span class="label label-primary pull-right">4</span>-->
+          </a>
+        <ul class="treeview-menu">
+            <li class="{% if request.resolver_match.url_name == 'add_type' %}active{% endif %}"><a href="/admin/add-type/"><i class="fa fa-circle-o"></i>Add Type</a></li>
+            <li class="{% if request.resolver_match.url_name == 'list_type' %}active{% endif %}"><a href="/admin/types/"><i class="fa fa-circle-o"></i> List Type</a></li>
+        </ul>
+        </li>
+        
+        <li class="treeview {% if request.resolver_match.url_name == 'list_feedbacks' %}active{% endif %}
+                            {% if request.resolver_match.url_name == 'feedback_details' %}active{% endif %}"> 
+           <a href="#">
+            <i class="fa fa-files-o"></i>
+            <span>Feedbacks</span>
+           </a>
+        <ul class="treeview-menu">
+            <li class="{% if request.resolver_match.url_name == 'list_feedbacks' %}active{% endif %}"><a href="/admin/feedbacks/"><i class="fa fa-circle-o"></i>list</a></li>
+        </ul>
+        </li>
+         <li class="treeview {% if request.resolver_match.url_name == 'admin_change_password' %}active{% endif %}
+                             {% if request.resolver_match.url_name == 'admin_change_email' %}active{% endif %}"> 
+           <a href="#">
+            <i class="fa fa-files-o"></i>
+            <span>Settings Section</span>
+           </a>
+        <ul class="treeview-menu">
+            <li class="{% if request.resolver_match.url_name == 'admin_change_password' %}active{% endif %}"><a href="{% url 'admin_change_password' %}"><i class="fa fa-circle-o"></i>Change Password</a></li>
+            <li class="{% if request.resolver_match.url_name == 'admin_change_email' %}active{% endif %}"><a href="{% url 'admin_change_email' %}"><i class="fa fa-circle-o"></i>Change Email</a></li>
+        </ul>
+        </li>
+       </ul>
+    </section>
+    <!-- /.sidebar -->
+  </aside>
+
+<!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <section class="content">
+        <div class="row">
+            {% block content %}{% endblock %}
+        
+        </div> <!--  end of header open row div   -->
+    </section> <!--  end of header open section   -->
+  </div> <!--  end of header open content wrapper div   -->
+<footer class="main-footer">
+    <strong>Copyright &copy; 2015-2016 <a href="/">VibaNote</a>.</strong> All rights
+    reserved.
+  </footer>
+      <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Create the tabs -->
+    <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+      <li><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
+      <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
+    </ul>
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <!-- Home tab content -->
+      <div class="tab-pane" id="control-sidebar-home-tab">
+        <h3 class="control-sidebar-heading">Recent Activity</h3>
+        <ul class="control-sidebar-menu">
+          <li>
+            <a href="javascript:void(0)">
+              <i class="menu-icon fa fa-birthday-cake bg-red"></i>
+
+              <div class="menu-info">
+                <h4 class="control-sidebar-subheading">Langdon's Birthday</h4>
+
+                <p>Will be 23 on April 24th</p>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">
+              <i class="menu-icon fa fa-user bg-yellow"></i>
+
+              <div class="menu-info">
+                <h4 class="control-sidebar-subheading">Frodo Updated His Profile</h4>
+
+                <p>New phone +1(800)555-1234</p>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">
+              <i class="menu-icon fa fa-envelope-o bg-light-blue"></i>
+
+              <div class="menu-info">
+                <h4 class="control-sidebar-subheading">Nora Joined Mailing List</h4>
+
+                <p>nora@example.com</p>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">
+              <i class="menu-icon fa fa-file-code-o bg-green"></i>
+
+              <div class="menu-info">
+                <h4 class="control-sidebar-subheading">Cron Job 254 Executed</h4>
+
+                <p>Execution time 5 seconds</p>
+              </div>
+            </a>
+          </li>
+        </ul> 
+        <!-- /.control-sidebar-menu -->
+
+        <h3 class="control-sidebar-heading">Tasks Progress</h3>
+        <ul class="control-sidebar-menu">
+          <li>
+            <a href="javascript:void(0)">
+              <h4 class="control-sidebar-subheading">
+                Custom Template Design
+                <span class="label label-danger pull-right">70%</span>
+              </h4>
+
+              <div class="progress progress-xxs">
+                <div class="progress-bar progress-bar-danger" style="width: 70%"></div>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">
+              <h4 class="control-sidebar-subheading">
+                Update Resume
+                <span class="label label-success pull-right">95%</span>
+              </h4>
+
+              <div class="progress progress-xxs">
+                <div class="progress-bar progress-bar-success" style="width: 95%"></div>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">
+              <h4 class="control-sidebar-subheading">
+                Laravel Integration
+                <span class="label label-warning pull-right">50%</span>
+              </h4>
+
+              <div class="progress progress-xxs">
+                <div class="progress-bar progress-bar-warning" style="width: 50%"></div>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a href="javascript:void(0)">
+              <h4 class="control-sidebar-subheading">
+                Back End Framework
+                <span class="label label-primary pull-right">68%</span>
+              </h4>
+
+              <div class="progress progress-xxs">
+                <div class="progress-bar progress-bar-primary" style="width: 68%"></div>
+              </div>
+            </a>
+          </li>
+        </ul>
+        <!-- /.control-sidebar-menu -->
+
+      </div>
+      <!-- /.tab-pane -->
+      <!-- Stats tab content -->
+      <div class="tab-pane" id="control-sidebar-stats-tab">Stats Tab Content</div>
+      <!-- /.tab-pane -->
+      <!-- Settings tab content -->
+      <div class="tab-pane" id="control-sidebar-settings-tab">
+        <form method="post">
+            <h3 class="control-sidebar-heading">General Settings</h3> 
+        </form>
+      </div>
+      <!-- /.tab-pane -->
+    </div>
+  </aside>
+  <!-- /.control-sidebar -->
+  <!-- Add the sidebar's background. This div must be placed
+       immediately after the control sidebar -->
+  <div class="control-sidebar-bg"></div>
+  
+</div>
+<!-- ./wrapper -->
+
+<script src='{% static "js/jquery-1.12.4.js" %}'></script>
+<script src='{% static "js/bootstrap.min.js" %}'></script>
+<script src='{% static "js/wenzhixin_bootstrap-table.js" %}'></script>
+<script src='{% static "js/wenzhixin_bootstrap-table_ga.js" %}'></script>
+<script src='{% static "plugins/slimScroll/jquery.slimscroll.min.js" %}'></script>
+<script src='{% static "plugins/fastclick/fastclick.js" %}'></script>
+<script src='{% static "dist/js/app.min.js" %}'></script>
+<script src='{% static "dist/js/demo.js" %}'></script>
+<script src='{% static "js/summernote.js" %}'></script>
+<script src='{% static "plugins/datatables/jquery.dataTables.min.js" %}'></script>
+<script src='{% static "plugins/datatables/dataTables.bootstrap.min.js" %}'></script> 
+<script src='{% static "js/jquery.toast.min.js" %}'></script> 
+<script src='{% static "js/jquery-ui.js" %}'></script> 
+<script>
+    function showToast(type,msg){
+        $.toast({
+            heading: type,
+            text: msg,
+            icon: type,
+            position: 'top-center', 
+            showHideTransition: 'slide'
+        });
+    }
+</script>
+<script>
+    $("#id_unread_count").click(function() {
+        var user_id = '{{request.session.admin_id}}';
+        $.ajax({
+            url: "{% url 'admin_read_thread' %}",
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            data: {user_id:user_id},
+            beforeSend: function() {
+                $("#default_loader").show();
+            },
+            success: function(data) {
+                $("#default_loader").hide();    
+                if (data=="1") {
+                    location.assign("{% url 'admin_inbox_messages' %}"); 
+                } else {
+                    showToast("error","Sorry some error!");    
+                }
+            }, 
+            error: function(err) {
+                $("#default_loader").hide();
+                showToast("error","Sorry some error!");   
+            }
+    });
+ });   
+</script>
+<script>
+    function send_message(formdata){
+        return $.ajax({
+            url: "{% url 'user_send_message' %}",
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            dataType: 'json',
+            data: formdata,
+            processData: false,
+            contentType: false,
+            beforeSend: function() {
+                $("#default_loader").show();
+            },
+            success: function(data) {
+                $("#default_loader").hide();    
+                if (data=="1") {
+                    return "1";  
+                } else {
+                    return "0";    
+                }
+            }, 
+            error: function(err) {
+                $("#default_loader").hide();
+                return "0";    
+            }
+        });
+    }
+    
+$(".modal").on("hidden.bs.modal", function(){
+    $("#frm_contactartist")[0].reset();
+});    
+</script>
+{% block script %}{% endblock %}
+{% if messages %}
+{% for message in messages %}
+<script>
+    var msg = '{{ message }}';
+    var type = '{{ message.tags }}';
+    showToast(type,msg);
+</script>
+{% endfor %}
+{% endif %}
+</body>
+</html>   
+
+            

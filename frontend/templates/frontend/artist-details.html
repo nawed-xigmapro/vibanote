@@ -1,0 +1,341 @@
+{% extends 'frontend/base.html' %}
+{% block metasocial %}
+<meta content="IE=edge" http-equiv=X-UA-Compatible>
+<meta content="width=device-width,initial-scale=1" name=viewport>
+<meta content="IE=edge" http-equiv=X-UA-Compatible>
+<meta content="width=device-width,initial-scale=1" name=viewport>
+<meta property="og:title" id="titleogid" content="Vibanote" />
+<meta property="og:type" content="website" />
+<meta property="og:description" id="descriptionogid" content="For music lovers" />
+<meta property="og:url" id="urlogid" content="http://119.18.52.139:8000{{ request.get_full_path }}" />
+<meta property="og:image" id="imageogid" content="/media/{{user.picture}}" />
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@VibanoteMedia">
+<meta name="twitter:url" content="http://119.18.52.139:8000{{ request.get_full_path }}">
+<meta name="twitter:title" content="Vibanote">
+<meta name="twitter:description" content="For music lovers">
+<meta name="twitter:creator" content="@VibanoteMedia">
+<meta name="twitter:image:src" content="/media/{{user.picture}}" />
+<meta name="twitter:image:alt" content="Vibanote MEDIA" />
+<!--<meta name="twitter:domain" content="socialmediamarketinginc.com"> -->
+{% endblock %}
+{% block title %}Artist Details{% endblock %}
+{% block content %}
+{% load social_share %}
+{% load template_functions %}
+<section class="inner-bg">
+    <div class="container">
+        <div class="album-banner">
+            <div class="row">
+                <div class="col-md-3 col-sm-3 text-center">
+                    <div class="album-pro-pic">
+                    {% if user.picture %}    
+                        <img alt="{{ user.name }}" src="/media/{{ user.picture}}">
+                    {% else %}
+                         <img alt="{{ user.name }}" src="/static/images/no-user-image.png">
+                    {% endif %}
+                    </div>	
+                </div>
+                <div class="col-md-9 col-sm-9">
+                    <h2>
+                        <span>{{user.name}}</span>
+                        {% if request.session.member_id %}
+                            {% if request.session.member_id == user.user_id %}
+                                <span onclick='showToast("error","cannot Message yourself!");' style="cursor: pointer;"><i class="fa fa-envelope" aria-hidden="true"></i></span>
+                            {% else %}
+                                <span data-toggle="modal" data-target="#contactmodal" style="cursor: pointer;"><i class="fa fa-envelope" aria-hidden="true"></i></span>
+                            {% endif %}    
+                        {% else %}    
+                            <span onclick='showToast("error","Please Logged in to Contact!");' style="cursor: pointer;"><i class="fa fa-envelope" aria-hidden="true"></i></span>
+                        {% endif %}
+                    </h2>
+                    <h3>
+                        <span>{{user.country_name}}</span>
+                        {% if user.is_loggedin == 1 %}
+                            <span><img style="width: 20px; height: 20px;" src="/static/images/Status-user-online-icon.png" alt=""></span>
+                        {% else %}
+                            <span><img style="width: 20px; height: 20px;" src="/static/images/user-offline-icon.png" alt=""></span>
+                        {% endif %}
+                    </h3>
+                    <div class="album-details-share">
+                        <ul>
+                            <li><a class="ns_likeit" data-likeid='{{ user.user_id }}' data-liketype='user' href="javascript:void(0)"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i><span>{{ user.like_counts }}</span></a></li>
+                            <li>{% post_to_facebook object_or_url 'Facebook Share' %}</li>
+                            <li>{% post_to_twitter "" object_or_url  "Twitter Share"  %}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="inner-wrapper">
+            <div class="row">
+                <div class="col-md-9 col-sm-9">
+                    <div class="artist-tab">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#track" aria-controls="track" role="tab" data-toggle="tab">Track</a></li>
+                            <li role="presentation"><a href="#album" aria-controls="album" role="tab" data-toggle="tab">Album</a></li>
+                            <li role="presentation"><a href="#video" aria-controls="video" role="tab" data-toggle="tab">Video</a></li>
+                        </ul>
+
+                        <!-- Tab panes -->
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane active" id="track">
+                                {% if tracks %}
+                                <ul class="track-details">
+                                    {% for track in tracks %}    
+                                    <li>
+                                        <div class="track-detail-img">
+                                            <a href="{% url 'public_track_detail' track.slug %}">
+                                            {% if track.track_image %}    
+                                                <img src="/media/{{track.track_image}}">
+                                            {% else %}   
+                                                <img style="height:80px;width: 80px;" src="/static/images/no-content.jpg">
+                                            {% endif %}      
+                                            </a>
+                                        </div>
+                                        <div class="track-detail-content">
+                                            <h3><a href="{% url 'public_track_detail' track.slug %}">{{track.title}}</a></h3>
+                                            <audio controls="controls">
+                                                <source src="/media/{{track.track_file}}" type="audio/mpeg">
+                                            </audio>	
+                                        </div>	
+                                        {% if track.dedicate %}
+                                            {% get_tags track.dedicate as showtags %}
+                                            <div class="tags">
+                                                <div class="tags-content">
+                                                <h2><i class="fa fa-heart" aria-hidden="true"></i> This song is dedicated to:</h2>
+                                                {% for showtag in showtags %}
+                                                    <span><a href="#{{showtag}}">{{showtag}}</a></span> 
+                                                    {% endfor %}  
+                                                </div>          
+                                            </div>  
+                                        {% endif %} 
+                                        <div class="all-content-share">
+                                            <ul>
+                                                <li><a class="ns_likeit" data-likeid='{{ track.id }}' data-liketype='track' href="javascript:void(0)"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i><span>{{ track.like_counts }}</span></a></li>
+                                            </ul>  
+                                        </div>
+                                    </li>
+                                    {% endfor %}        
+                                </ul>
+                                {% else %}
+                                <p>No track available</p>
+                                {% endif %}
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="album">
+                            {% if albums %}    
+                                <ul class="track-details">
+                                    {% for album in albums %}    
+                                    <li>
+                                        <div class="track-detail-img">
+                                            <a href="#">
+                                            {% if album.album_image %}    
+                                                <img src="/media/{{album.album_image}}">
+                                            {% else %}   
+                                                <img style="height:80px;width: 80px;" src="/static/images/no-content.jpg">
+                                            {% endif %}       
+                                            </a>
+                                        </div>
+                                        {% if album.dedicate %}
+                                            {% get_tags album.dedicate as showtags %}
+                                            <div class="tags">
+                                                <div class="tags-content">
+                                                <h2><i class="fa fa-heart" aria-hidden="true"></i> This album is dedicated:</h2>
+                                                {% for showtag in showtags %}
+                                                    <span><a href="#{{showtag}}">{{showtag}}</a></span> 
+                                                    {% endfor %} 
+                                                </div>           
+                                             </div>  
+                                        {% endif %} 
+                                        <div class="track-detail-content" style="margin-top: 22px;">
+                                            <h3><a href="{% url 'public_album_details' album.slug %}">{{album.title}}</a></h3>
+                                        </div>	
+                                        <div class="all-content-share">
+                                            <ul>
+                                                <li><a class="ns_likeit" data-likeid='{{ album.id }}' data-liketype='album' href="javascript:void(0)"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i><span>{{ album.like_counts }}</span></a></li>
+                                            </ul>  
+                                        </div>
+                                    </li>
+                                    {% endfor %}        
+                                </ul>
+                            {% else %}
+                                <p>No album available</p>
+                            {% endif %}
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="video">
+                            {% if videos %}    
+                                <div class="row">
+                                {% for video in videos %}    
+                                    <div class="col-md-4 col-sm-4 col-xs-12">
+                                        <div class="single-result-for-video">
+                                            <iframe width="100%" height="150" src="{{video.link}}" frameborder="0" allowfullscreen=""></iframe>
+                                            <h3 class="heading-all"><a href="{% url 'public_video_detail' video.slug %}">{{ video.title }}</a></h3>
+                                        </div>
+                                    {% if video.dedicate %}
+                                    {% get_tags video.dedicate as showtags %}
+                                        <div class="tags">
+                                            <div class="tags-content">
+                                            <h2><i class="fa fa-heart" aria-hidden="true"></i> This video is dedicated to :</h2>
+                                            {% for showtag in showtags %}
+                                                <span><a href="#{{showtag}}">{{showtag}}</a></span> 
+                                                {% endfor %}  
+                                            </div>          
+                                        </div>  
+                                    {% endif %}   
+                                    <div class="all-content-share">
+                                        <ul>
+                                          <li><a class="ns_likeit" data-likeid='{{ video.id }}' data-liketype='video' href="javascript:void(0)"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i><span>{{ video.like_counts }}</span></a></li>
+                                        </ul>  
+                                    </div>
+                                    </div>
+                                {% endfor %}
+                                </div>
+                            {% else %}
+                            <p>No video available</p>
+                            {% endif %}
+                            </div>
+                        </div>
+                    </div>
+            </div>
+               {% if related_artists %}
+                <div class="col-md-3 col-sm-3">
+                    <h3 class="related-albm-hdng">Related artist</h3>
+                    <ul class="related-albums">
+                    {% for related_artist in related_artists %}  
+                        <li>
+                            <div class="related-albums-img">
+                                <a href="{% url 'artist_details' related_artist.username %}">
+                                 {% if related_artist.picture %}   
+                                    <img src="/media/{{ related_artist.picture }}">
+                                 {% else %}   
+                                    <img src="/static/images/no-user-image.png">
+                                 {% endif %}  
+                                </a>
+                            </div>
+                            <div class="related-albums-title">
+                                <h3><a href="{% url 'artist_details' related_artist.username %}">{{ related_artist.name }}</a></h3>
+                                <h4><a href="#">{{ related_artist.country_name }}</a></h4>
+                            </div>
+                        </li>
+                    {% endfor %}    
+                    </ul>
+                </div>
+               {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+<!-- contact modal start -->
+<div class="modal fade signin-modal" id="contactmodal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div id="logbox">
+                    <form role="form" id="frm_contactartist" method="post" enctype="multipart/form-data">
+                        <h3>Compose Message</h3>
+                        <div class="form-group">
+                            <label>Subject<span style="color: red;">*</span></label>
+                            <input name="subject" type="text" class="form-control" placeholder="Message Subject" required="">
+                        </div>
+                        <div class="form-group">
+                            <label>Message Body<span style="color: red;">*</span></label>
+                            <textarea style="height: 150px;" name="body" placeholder="Message Body" class="form-control" required=""></textarea>
+                        </div>
+                        <div class="form-group text-center">
+                            <input type="hidden" name="touser_id" value="{{ user.user_id }}">
+                            <input type="hidden" name="fromuser_id" value="{{ request.session.member_id }}">
+                            <input type="hidden" name="thread_id" value="0">
+                            <button class="btn btn-danger" type="button" id="id_btnsend">Send</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- contact modal end -->
+
+{% endblock %}
+{% block script %}
+<script>
+$( document ).ready(function() {
+    $( ".ns_likeit" ).each(function( index ) {
+    var nsthis = $( this );
+    nsthis.click(function() {
+        var user_id = '{{request.session.member_id}}';
+        if(user_id){ 
+        var lid = nsthis.data("likeid");
+        var ltype = nsthis.data("liketype");
+        //alert(ltype);
+        $.ajax({ // create an AJAX call...
+            data:{ lid : lid, ltype : ltype },
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            url: '/like-it/', // the file to call
+            success: function(response) { // on success..
+                var result = JSON.parse(response);
+                if(result.Ack=="1"){
+                   nsthis.find(' span').html(result.likes);
+                   showToast(result.msg_type,result.msg); 
+                } else{
+                   showToast(result.msg_type,result.msg); 
+                } 
+            }
+        });
+      } else {
+          showToast("error","Please Logged in to like!");
+      }  
+    });
+}); 
+});    
+
+</script>
+<script>
+$( document ).ready(function() {  
+    var user_id = '{{ user.user_id }}';
+    $.ajax({ // create an AJAX call...
+            data:{ 'user_id' : user_id },
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            url: '/add-browsed/', // the file to call
+            success: function(response) { // on success..
+                //var result = JSON.parse(response);
+                if(response=="1"){
+                   console.log("browsed");
+                } else{
+                   console.log("not browsed");
+                } 
+            }
+        });
+        
+      
+        
+        
+});   
+</script>
+
+{% if request.session.member_id != user.user_id %}
+<script>
+     $( "#id_btnsend" ).click(function( event ) {
+         if($("#frm_contactartist")[0].checkValidity()) {    
+           var fd = new FormData($("#frm_contactartist")[0]);  
+           var promise = send_message(fd);
+           console.log(promise);
+           promise.done(function(rsp) {
+                console.log(rsp);
+                if(rsp=="1"){
+                    $('#contactmodal').modal('hide');
+                    showToast("success","Message Send!");
+                } else {
+                     showToast("success","Message cannot Send!");
+                }   
+           });
+        } else {
+            alert("please fill up the form!");
+        }   
+           return false;
+    }); 
+</script>
+{% endif %}
+{% endblock %}

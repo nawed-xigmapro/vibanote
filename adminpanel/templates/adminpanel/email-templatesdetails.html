@@ -1,0 +1,35 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}Template Details{% endblock %}
+{% block content %}
+  <div class="col-md-12">
+     <form method="post" action="/admin/edit-mailtemplate/">{% csrf_token %}
+         <input type="hidden" name="template_id" value="{{ emailtemplate.id }}" >
+              <div class="form-group">
+                <label>Template Title:</label>
+                <input name="template_title" value="{{ emailtemplate.templatename }}" type="text" class="form-control" required="required" >
+              </div>
+              <div class="form-group">
+                <label>Template Subject:</label>
+                <input name="template_subject" value="{{ emailtemplate.subject }}" type="text" class="form-control" required="required" >
+              </div>
+              <div class="form-group">
+                <label>Template Content:</label>
+                <textarea name="template_body" id="summernote" required="required">{{ emailtemplate.templatebody }}</textarea>
+              </div> 
+              <button type="submit" name="btn_edit" class="btn btn-primary">Submit</button>
+              
+        </form>
+   </div>
+
+{% endblock %}
+{% block script %}
+<script>
+$(document).ready(function() {
+  $('#summernote').summernote({
+  minHeight: 400,             // set minimum height of editor
+  maxHeight: null,             // set maximum height of editor
+  focus: true                  // set focus to editable area after initializing summernote
+});
+});
+</script>
+{% endblock %}

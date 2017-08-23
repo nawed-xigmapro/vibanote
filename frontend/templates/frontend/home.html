@@ -1,0 +1,157 @@
+{% extends 'frontend/base.html' %}
+{% block title %}Home{% endblock %}
+{% block content %}
+{% load template_functions %}
+<section>
+    <div class="block-sec">
+        <ul>
+            <li style="background:url('/static/images/block1.jpg') center center no-repeat; background-size:cover ;">
+                <div class="block-1">
+                    <div class="block-content">
+                        <h2>Be </h2>
+                        <h3>Creative</h3>
+                    </div>	
+                </div>	
+            </li>
+            <li class="block-2" style="background:url('/static/images/block2.jpg') center center no-repeat; background-size:cover ;">
+                <div class="block-2">
+                    <div class="block-content">
+                        <h2>Be </h2>
+                        <h3>Original</h3>
+                    </div>	
+                </div>	
+            </li>
+            <li class="block-1" style="background:url('/static/images/block3.jpg') center center no-repeat; background-size:cover ;">
+                <div class="block-1">
+                    <div class="block-content">
+                        <h2>Be </h2>
+                        <h3>BOLD</h3>
+                    </div>	
+                </div>	
+            </li>
+            <li class="block-2" style="background:url('/static/images/block4.jpg') center center no-repeat; background-size:cover ;">
+                <div class="block-2">
+                    <div class="block-content">
+                        <h2>Be </h2>
+                        <h3>POPULAR</h3>
+                    </div>	
+                </div>	
+            </li>
+        </ul>	
+    </div>
+</section>
+<section class="welcome-sec">
+    
+    {% cmsbyid 14 as vivanote %}
+    <div class="container" data-aos="zoom-in">
+        <div class="row">
+            <div class="col-md-4 col-sm-4">
+                <div class="wel-left-sec">
+                    <h3>Viba Note</h3>
+                </div>
+            </div>
+            <div class="col-md-8 col-sm-8">
+                <div class="welcome-content">
+                    <h5>VibaNote is a Website</h5>
+                    <h3>Meant for Anyone to Dedicate or Promote
+                        Their Creative Passion for Music or Dance.</h3>
+                    {{ vivanote.text }}
+                    {% if request.session.member_id %}  
+                        {% comment %}<a href="#" data-toggle="modal" data-target="#signin" class="upload">Upload Now </a>{% endcomment %}
+                    {% else %} 
+                       <a href="#" data-toggle="modal" data-target="#signin" class="upload">Upload Now </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section>
+    <ul class="box-list" >
+        {% cmsbyid 10 as shareyourpassion %}
+        <li data-aos="zoom-in">
+            <div class="box-img">
+                <img src="/media/{{ shareyourpassion.pic }}">
+            </div>	
+        </li>
+        <li class="brown-box" data-aos="zoom-in">
+            <div class="box-content">
+                <h3>Share your</h3>
+                <h2>Passion</h2>
+               {{ shareyourpassion.text }}
+            </div>
+        </li>
+    </ul>
+    <div class="clearfix"></div>
+    <ul class="box-list">
+        {% cmsbyid 11 as dedicatecreation %}
+        <li class="green-box" data-aos="zoom-in">
+            <div class="box-content">
+                <h3>Dedicate your</h3>
+                <h2>creation</h2>
+                <p>{{ dedicatecreation.text }}</p>
+            </div>
+        </li>
+        <li data-aos="zoom-in">
+            <div class="box-img">
+                <img src="/media/{{ dedicatecreation.pic }}">
+            </div>	
+        </li>
+    </ul>
+    <div class="clearfix"></div>
+    <ul class="box-list">
+        {% cmsbyid 12 as getyourselfdiscovered %}
+        <li data-aos="zoom-in">
+            <div class="box-img">
+                <img src="/media/{{ getyourselfdiscovered.pic }}">
+            </div>	
+        </li>
+        <li class="brown-box" data-aos="zoom-in">
+            <div class="box-content">
+                <h3>Get yourself</h3>
+                <h2>discovered</h2>
+                <p>{{ getyourselfdiscovered.text }}</p>
+            </div>
+        </li>
+    </ul>
+    <div class="clearfix"></div>
+    <ul class="box-list">
+        {% cmsbyid 13 as connectwithothers %}
+        <li class="green-box" data-aos="zoom-in">
+            <div class="box-content">
+                <h3>Connect with</h3>
+                <h2>others</h2>
+                <p>{{ connectwithothers.text }}</p>
+            </div>
+        </li>
+        <li data-aos="zoom-in">
+            <div class="box-img">
+                <img src="/media/{{ connectwithothers.pic }}">
+            </div>	
+        </li>
+    </ul>
+</section>
+<section class="newsletter-sec" data-aos="zoom-in">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-5 col-sm-6">
+                <div class="newsletter-content">
+                    <h5>Start the journey</h5>
+                    <p>Stay up-to-date with latest event and other updates</p>
+                </div>
+            </div>
+            <div class="col-md-7 col-sm-6">
+                <form id="newsletter_form" action="/subscribe-newsletter/" method="post">{% csrf_token %}
+                    <input class="validate[required,custom[email]]" name="newsletter_mail" type="search" placeholder="Your email address">
+                    <input type="submit" name="btn_newsletter" value="Subscribe">
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block script %}
+<script>
+    $("#newsletter_form").validationEngine();
+</script>
+{% endblock %}

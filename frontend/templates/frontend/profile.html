@@ -1,0 +1,208 @@
+{% extends 'frontend/base-profile.html' %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+{% load template_functions %}
+<!-- page content -->
+<div class="right_col" role="main">
+    <div class="edit-profile">
+        <h2 class="heading">Edit your Profile</h2>
+
+        <div class="row">
+            <div class="col-sm-4 ">
+                <div class="profilepage-image">
+                    {% if userinfo.picture %}
+                    <img src="/media/{{ userinfo.picture }}" class="img200_200 img-circle">
+                    {% else %}
+                    <img src="/static/images/no-img.jpg" class="img200_200 img-circle">
+                    {% endif %}    
+                </div>	
+                <br/>
+                <div class="form-group ">
+                    <label>Upload Profile Picture </label>
+                    <input id="change_picture" name="picture" type="file">
+                </div>
+            </div>
+            <form method="post" action="/edit-profile/" enctype="multipart/form-data">{% csrf_token %}
+                <div class="col-sm-4">
+                    {% get_countries as countries %}
+                    <div class="form-group ">
+                        <label>Name</label>
+                        <input name="name" type="text" class="form-control" value="{{ userinfo.name }}">
+                    </div>
+                    <div class="form-group ">
+                        <label>DOB</label>
+                        <input required type="text" id="datepicker" name="dob" value="{{ userinfo.dob |date:'m-d-Y'  }}" class="form-control">
+                    </div>
+                    <div class="form-group ">
+                        <label>Gender</label>
+                        <select name="gender" class="form-control">
+                            <option value="">select gender</option>
+                            <option value="male"{% if userinfo.gender == "male" %}selected{% endif %}>Male</option>
+                            <option value="female" {% if userinfo.gender == "female" %}selected{% endif %}>Female</option>
+                        </select>
+                    </div>
+                     <div class="form-group ">
+                        <label>Country</label>
+                        <select id="id_country" name="country"  class="form-control">
+                            <option value="">select Country</option>
+                            {% for country in countries %}
+                                <option value="{{country.id}}" data-phonecode="{{country.phonecode}}">{{ country.name }}</option>
+                            {% endfor%}
+                        </select>
+                    </div>
+                    <div class="form-group ">
+                        <label>State</label>
+                        {% if userinfo.country %}
+                            {% get_statesbyid  userinfo.country as states %}
+                        {% endif %}    
+                        <select id="id_state" name="state"  class="form-control">
+                            <option value="">select states</option>
+                            {% for state in states %}
+                                <option value="{{state.id}}">{{ state.name }}</option>
+                            {% endfor%}
+                        </select>
+                    </div>
+                    <div class="form-group ">
+                        <label>City</label>
+                        <input name="city" type="text" class="form-control" value="{{ userinfo.city }}" >
+                    </div>
+                    <div class="form-group ">
+                        <label>Phone</label>
+                        {% comment %}
+                        <br/>
+                        <select id="id_phone_code" name="phone_code">
+                            {% for country_phone in countries %}
+                                <option value="{{country_phone.phonecode}}">{{ country_phone.sortname }}</option>
+                            {% endfor%}
+                        </select>
+                        {% endcomment %}    
+                        {% if userinfo.phone_code %}
+                        <input size="3" id="id_phone_code" name="phone_code" type="text" readonly="" value="+{{ userinfo.phone_code }}">
+                        {% else %}    
+                            <input size="3" id="id_phone_code" name="phone_code" type="text" readonly="" value="+1">
+                        {% endif %}    
+                        <input name="phone" type="text" value="{{ userinfo.phone }}">
+                        
+                    </div>
+                    <div class="form-group ">
+                        <label>Address</label>
+                        <textarea name="address" class="form-control" >{{ userinfo.address }}</textarea>
+                    </div>
+                    <div class="form-group ">
+                        <label>Short Description</label>
+                        <textarea name="description" class="form-control" >{{ userinfo.description }}</textarea>
+                    </div>
+                    {% comment %}
+                    <div class="form-group ">
+                        <label>Your link</label>
+                        <input name="website" value="{{ userinfo.website }}" type="text" class="form-control" placeholder="Enter web link">
+                    </div>
+                    {% endcomment %}
+                    <div class="form-group text-right">
+                        <input name="btn_edit" type="submit" value="Save Changes" class="btn btn-danger">
+                    </div>
+
+                </div>
+            </form>     
+        </div>
+
+    </div>
+
+</div>
+<!-- /page content -->
+{% endblock %}      
+{% block script%}
+<script type="text/javascript">
+
+    jQuery(function () {
+        var default_date = '{{ userinfo.dob | date:"m-d-Y" }}';
+        console.log(default_date);
+        jQuery("#datepicker").datepicker({
+            dateFormat: 'mm-dd-yy',
+            defaultDate: new Date(default_date),
+            changeMonth: true,
+            changeYear: true,
+            yearRange: "-50:+0"
+        });
+
+        $("#change_picture").change(function () {
+            var fileUpload = $("#change_picture")[0];
+            //Check whether the file is valid Image.
+            var regex = new RegExp("([a-zA-Z0-9\s_\\.\-:])+(.jpg|.jpeg|.png|.gif)$");
+            if (regex.test(fileUpload.value.toLowerCase())) {
+                var formData = new FormData();
+                formData.append('picture', $('input[type=file]')[0].files[0]);
+                $.ajax({// create an AJAX call...
+                    headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                    data: formData,
+                    contentType: false,
+                    cache: false,
+                    processData: false,
+                    type: 'POST', // GET or POST
+                    url: '/upload-pic/', // the file to call
+                    beforeSend: function () {
+                        $('#default_loader').show();
+                    },
+                    success: function (response) { // on success..
+                        if (response == 1)
+                            $('#default_loader').hide();
+                        window.location.assign('/profile/');
+                    }
+                });
+            } else {
+                $('#default_loader').hide();
+                alert("Please select a valid Image file.");
+                //$("#change_picture").filestyle('clear');
+                return false;
+            }
+        });
+
+    });
+</script>
+<script>
+    var js_countryid = '{{userinfo.country}}';
+    if(js_countryid){
+        $("#id_country").val('{{userinfo.country}}');
+    } 
+    var js_stateid = '{{userinfo.state}}';
+    if(js_stateid){
+        $("#id_state").val(js_stateid);
+    }
+    $("#id_country").change(function () {
+        
+    var country_id = $(this).val();
+    var phone_code = $(this).find(':selected').data("phonecode");
+        //alert(phone_code);
+        $.ajax({// create an AJAX call...
+                    headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                    data: {'country_id' : country_id},
+                    type: 'POST', // GET or POST
+                    url: '/get-states/', // the file to call
+                    beforeSend: function () {
+                        $('#default_loader').show();
+                    },
+                    success: function (data) { // on success..
+                        var response = jQuery.parseJSON( data );
+                        $('#default_loader').hide();
+                        if (response.ack == "1") {
+                            $("#id_phone_code").val("+"+phone_code);
+                            var select = $('#id_state');
+                            var states = jQuery.parseJSON(response.states) ;  
+                            console.log(states);
+                            select.html('<option value="">Select states</option>');
+                            for (var j = 0; j < states.length; j++){
+                               console.log(states[j].text + "--" + states[j].value);
+                               select.append("<option value='" +states[j].value+ "'>" +states[j].text+ "</option>");
+                            }
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) 
+                    {
+                        $('#default_loader').hide();
+                        return false;      
+                    }
+        });
+        
+    });
+</script>
+{% endblock %} 

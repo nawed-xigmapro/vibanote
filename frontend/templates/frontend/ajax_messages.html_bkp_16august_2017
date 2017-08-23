@@ -1,0 +1,128 @@
+{% load template_functions %}
+{% if thread_type == 'inbox'%}
+<div class="pull-right">
+    <button data-toggle="modal" data-target="#contactmodal" id="id_btnreply" class="btn btn-default">Reply</button>
+</div>
+<br/>
+{% endif %}
+<div style="margin-top: 20px;" id="accordion">
+    {% for message in messages %}
+     {% userdetails message.fromuser_id as fromuser %}
+     {% if user_id == fromuser.user_id %}
+        <h3>You</h3>
+     {% else %}
+        <h3>{{fromuser.name}}</h3>
+     {% endif %}
+     <div class="card">
+        <div class="card card-block">
+            {{ message.body | safe }}
+        </div>
+     </div>
+    {% endfor %}
+</div> 
+<!-- contact modal start -->
+<div class="modal fade signin-modal conmodal" id="contactmodal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div id="logbox">
+                    <form role="form" id="frm_contactartist" method="post" enctype="multipart/form-data">
+                        <h3>Compose Message</h3>
+                        <div class="form-group">
+                            <label>Subject<span style="color: red;">*</span></label>
+                            <input value="{{messages.0.subject}}" name="subject" type="text" class="form-control" placeholder="Message Subject" required="">
+                        </div>
+                        <div class="form-group">
+                            <label>Message Body<span style="color: red;">*</span></label>
+                            <textarea  name="body" placeholder="Message Body" class="form-control cl_summernote" required=""></textarea>
+                        </div>
+                        <div class="form-group text-center">
+                            <input type="hidden" name="touser_id" value="{{ reply_userid }}">
+                            <input type="hidden" name="fromuser_id" value="{{ user_id }}">
+                            <input type="hidden" name="thread_id" value="{{ thread_id }}">
+                            <button class="btn btn-danger" type="button" id="id_btnsend">Send</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+</div>
+<!-- contact modal end -->
+<script>
+  $( function() {
+    $( "#accordion" ).accordion();
+    
+    $( "#id_btnsend" ).click(function( event ) {
+           var fd = new FormData($("#frm_contactartist")[0]);  
+           var promise = send_message(fd);
+           console.log(promise);
+           promise.done(function(rsp) {
+                console.log(rsp);
+                if(rsp=="1"){
+                    $('#contactmodal').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    showToast("success","Message Send!");
+                    $.ajax({
+                        url: "{% url 'get_user_messages' %}",
+                        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                        type: "POST",
+                        data: {thread_id:'{{ thread_id }}',thread_type:'{{ thread_type }}'},
+                        beforeSend: function() {
+                            $("#default_loader").show();
+                        },
+                        success: function(data) {
+                            $("#default_loader").hide();   
+                                $("#msg_div").html(data);
+                        }, 
+                        error: function(err) {
+                            $("#default_loader").hide();
+                        }
+                    }); 
+                } else {
+                     showToast("success","Message cannot Send!");
+                }   
+           });
+           //return false;
+    }); 
+    
+});
+</script>
+<script>
+    function send_message(formdata){
+        return $.ajax({
+            url: "{% url 'user_send_message' %}",
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            dataType: 'json',
+            data: formdata,
+            processData: false,
+            contentType: false,
+            beforeSend: function() {
+                $("#default_loader").show();
+            },
+            success: function(data) {
+                $("#default_loader").hide();    
+                if (data=="1") {
+                    return "1";  
+                } else {
+                    return "0";    
+                }
+            }, 
+            error: function(err) {
+                $("#default_loader").hide();
+                return "0";    
+            }
+        });
+    }
+</script>
+<script>
+$('.cl_summernote').summernote({
+      minHeight: 200,            
+      focus: true
+});
+</script>
+

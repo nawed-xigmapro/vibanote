@@ -1,0 +1,51 @@
+{% extends 'adminpanel/baseinner.html' %}
+{% block title %}Mail Templates{% endblock %}
+{% block content %}
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <h3 class="box-title">Email Templates</h3>
+            
+            <div class="box-body">
+                <table id="example2" class="table table-bordered table-hover dataTable" role="grid" aria-describedby="example2_info">
+                     <thead>
+                        <tr>
+                          <th>Sr No.</th>
+                          <th>Template ID</th>
+                          <th>Template Name</th>
+                          <th>Template Body</th>
+                          <th>Edit</th>
+                          
+                        </tr>
+                    </thead>
+                     <tbody>
+                     {% for emailtemplate in emailtemplates %}
+                      <tr>
+                          <td>{{ forloop.counter }}</td>
+                          <td>{{ emailtemplate.id }}</td>
+                          <td>{{ emailtemplate.templatename }}</td>
+                          <td>{{ emailtemplate.templatebody |truncatechars:300 }}</td>
+                          <td><a href="/admin/edit-emailtemplate/{{ emailtemplate.id }}" class="btn btn-primary" >Edit Template</a></td>
+                      </tr>
+                      {% endfor %}
+                     </tbody>
+                </table>
+            </div> 
+        </div>
+    </div>
+</div>
+
+<script>
+   $(function () {
+    $('#example2').DataTable({
+      "paging": true,
+      "lengthChange": false,
+      "searching": true,
+      "ordering": true,
+      "info": true,
+      "dom": '<"pull-left"f><"pull-right"l>tip',
+      "autoWidth": true
+    });
+  });  
+  
+</script>
+{% endblock %}

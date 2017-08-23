@@ -1,0 +1,79 @@
+{% extends 'frontend/base-profile.html' %}
+{% block title %}Sent Messages{% endblock %}
+{% block content %}
+{% load template_functions %}
+<!-- page content -->
+<div class="right_col" role="main">
+    <div class="edit-profile">
+        <h2 class="heading">Conversations</h2>
+        <div class="row ">
+            <div id="thread_div" class="col-md-3 nscol">
+                {% if threads %}
+                <ul class="list-unstyled">
+                {% for thread in threads %}
+                <li class="jqcl" style="cursor:pointer;">
+                    {% userdetails thread.touser_id as touser %}
+                    <input class="threadval" type="hidden" name="thread_id" value="{{ thread.thread_id }}">
+                    <div>
+                        <span><b>{{ touser.name }}</b></span>
+                        <span class="pull-right">{{ thread.msg_date|date:"M d" }}</span>
+                    </div>
+                    <div>{{ thread.subject}}</div>
+                    <div class="clearfix"></div>
+                    <div>{{ thread.body | truncatewords:10 | safe }}</div>   
+                    <hr/>
+                </li>    
+                {% endfor %}
+                </ul>
+                {% else %}
+                    <p>No Conversation yet!</p>
+                {% endif %}
+            </div>   
+            <div id="msg_div" class="col-md-9 nsthread">
+                <p class="nsp">No Conversation Selected.</p>
+            </div>   
+        </div>
+
+    </div>
+
+</div>
+<!-- /page content -->
+{% endblock %}      
+{% block script%}
+<style>
+    .nsthread{border: 1px solid; min-height: 500px;}
+    .nscol{border: 1px solid; border-right: 0; min-height: 500px;}
+    .nsp{text-align: center; color: black; margin-top: 50px;}
+</style>
+<script>
+    $(document).ready(function() {
+        var height = Math.max($("#thread_div").height(), $("#msg_div").height());
+        $("#thread_div").height(height);
+        $("#msg_div").height(height);
+    });
+</script>
+<script>
+$( ".jqcl" ).each(function( index ) {
+    $( this ).click(function() {
+        var thread_id = $(this).find(".threadval").val();
+        //alert(thread_id);
+        $.ajax({
+            url: "{% url 'get_user_messages' %}",
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            data: {thread_id:thread_id,thread_type:'sent'},
+            beforeSend: function() {
+                $("#default_loader").show();
+            },
+            success: function(data) {
+                $("#default_loader").hide();   
+                    $("#msg_div").html(data);
+            }, 
+            error: function(err) {
+                $("#default_loader").hide();
+            }
+        }); 
+    });
+});
+</script>
+{% endblock %} 

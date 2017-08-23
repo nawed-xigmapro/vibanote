@@ -1,0 +1,246 @@
+{% load template_functions %}
+<div class="pull-right composecht-sec" style="cursor: pointer;">
+    {% if thread_type == 'inbox'%}
+        <span class="compose-mail"><i data-toggle="modal" data-target="#contactmodal" id="id_btnreply" class="fa fa-reply fa-2x" aria-hidden="true"></i></span>
+    {% endif %}
+    <span class="del_thread">
+        <i id="id_trash" class="fa fa-trash-o fa-2x" aria-hidden="true"></i>
+        <input type="hidden" id="thread_id_delete" name="thread_id_delete" value="{{ thread_id }}">
+        <input type="hidden" id="user_id" name="user_id" value="{{ user_id }}">
+        {% if thread_type == 'inbox'%}
+        <input type="hidden" id="is_delete_thread" name="is_delete_thread" value="is_delete_to">
+        {% else %}    
+            <input type="hidden" id="is_delete_thread" name="is_delete_thread" value="is_delete_from">
+        {% endif %}
+    </span>
+    
+</div>
+
+<div style="margin-top: 25px;" id="accordion" class="right-conversation">
+    {% for message in messages %}
+     {% userdetails message.fromuser_id as fromuser %}
+     {% if user_id == fromuser.user_id %}
+        <h3>You</h3>
+     {% else %}
+        <h3>{{fromuser.name}}</h3>
+     {% endif %}
+     <div class="card">
+        <div class="pull-right del_msg">
+            <input type="hidden" class="msg_id" value="{{ message.id }}">
+            <input type="hidden" class="msg_user_id" value="{{ user_id }}">
+            <span style="cursor: pointer;" class="trash-com-icon"><i style="margin-top: -14px;" class="fa fa-trash-o msg_trash" aria-hidden="true"></i></span>
+        </div> 
+        <div class="card card-block">
+            {{ message.body | safe }}
+        </div>
+     </div>
+    {% endfor %}
+</div> 
+<!-- contact modal start -->
+<div class="modal fade signin-modal conmodal" id="contactmodal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div id="logbox">
+                    <form role="form" id="frm_contactartist" method="post" enctype="multipart/form-data">
+                        <h3>Compose Message</h3>
+                        <div class="form-group">
+                            <label>Subject<span style="color: red;">*</span></label>
+                            <input value="{{messages.0.subject}}" name="subject" type="text" class="form-control" placeholder="Message Subject" required="">
+                        </div>
+                        <div class="form-group">
+                            <label>Message Body<span style="color: red;">*</span></label>
+                            <textarea  name="body" placeholder="Message Body" class="form-control cl_summernote" required=""></textarea>
+                        </div>
+                        <div class="form-group text-center">
+                            <input type="hidden" name="touser_id" value="{{ reply_userid }}">
+                            <input type="hidden" name="fromuser_id" value="{{ user_id }}">
+                            <input type="hidden" name="thread_id" value="{{ thread_id }}">
+                            <button class="btn btn-danger" type="button" id="id_btnsend">Send</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+    </div>
+</div>
+<!-- contact modal end -->
+<script>
+  $( function() {
+    $( "#accordion" ).accordion();
+    
+    $( "#id_btnsend" ).click(function( event ) {
+           var fd = new FormData($("#frm_contactartist")[0]);  
+           var promise = send_message(fd);
+           console.log(promise);
+           promise.done(function(rsp) {
+                console.log(rsp);
+                if(rsp=="1"){
+                    $('#contactmodal').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    showToast("success","Message Send!");
+                    $.ajax({
+                        url: "{% url 'get_thread_detail' %}",
+                        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                        type: "POST",
+                        data: {thread_id:'{{ thread_id }}',thread_type:'{{ thread_type }}'},
+                        beforeSend: function() {
+                            $("#default_loader").show();
+                        },
+                        success: function(data) {
+                            $("#default_loader").hide();   
+                                $("#msg_div").html(data);
+                        }, 
+                        error: function(err) {
+                            $("#default_loader").hide();
+                        }
+                    }); 
+                } else {
+                     showToast("success","Message cannot Send!");
+                }   
+           });
+           //return false;
+    }); 
+    
+});
+</script>
+<script>
+    function send_message(formdata){
+        return $.ajax({
+            url: "{% url 'admin_user_send_message' %}",
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            dataType: 'json',
+            data: formdata,
+            processData: false,
+            contentType: false,
+            beforeSend: function() {
+                $("#default_loader").show();
+            },
+            success: function(data) {
+                $("#default_loader").hide();    
+                if (data=="1") {
+                    return "1";  
+                } else {
+                    return "0";    
+                }
+            }, 
+            error: function(err) {
+                $("#default_loader").hide();
+                return "0";    
+            }
+        });
+    }
+</script>
+<script>
+$('.cl_summernote').summernote({
+      minHeight: 200,            
+      focus: true
+});
+</script>
+<script>
+ /* Delete thread */    
+$( "#id_trash" ).click(function( event ) {
+        var user_id = $("#user_id").val();
+        var thread_id = $("#thread_id_delete").val();
+        var is_delete_thread = $("#is_delete_thread").val();
+        //alert(is_delete_thread);
+        //alert(thread_id);
+        $.ajax({
+            url: "{% url 'admin_delete_thread' %}",
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            data: {thread_id:thread_id,user_id:user_id},
+            beforeSend: function() {
+                $("#default_loader").show();
+            },
+            success: function(data) {
+                $("#default_loader").hide();    
+                if (data=="1") {
+                    if(is_delete_thread=="is_delete_to"){
+                        location.assign("{% url 'admin_inbox_messages' %}"); 
+                    }else{
+                        location.assign("{% url 'admin_outbox_messages' %}"); 
+                    }
+                } else {
+                    return "0";    
+                }
+            }, 
+            error: function(err) {
+                $("#default_loader").hide();
+                return "0";    
+            }
+        });
+    });
+/* Delete thread */       
+
+/* Delete Single Message */   
+$( ".del_msg" ).each(function() {
+  var ns_this = $(this);  
+  //alert(ns_this.find(".msg_id").val());
+  ns_this.find( ".msg_trash" ).click(function( event ) {
+        var user_id = ns_this.find(".msg_user_id").val();
+        var msg_id = ns_this.find(".msg_id").val();
+        var thread_id = $("#thread_id_delete").val();
+        var thread_type = '{{ thread_type }}';
+        var is_delete_thread = $("#is_delete_thread").val();
+        $.ajax({
+            url: "{% url 'admin_delete_msg' %}",
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            data: {msg_id:msg_id,user_id:user_id,thread_id:thread_id},
+            beforeSend: function() {
+                $("#default_loader").show();
+            },
+            success: function(data) {
+                $("#default_loader").hide();    
+                var obj = jQuery.parseJSON( data );
+                if (obj.ack=="1") {
+                    showToast(obj.msg_type,obj.msg_type);
+                    $.ajax({
+                        url: "{% url 'get_thread_detail' %}",
+                        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                        type: "POST",
+                        data: {thread_id:thread_id,thread_type:thread_type},
+                        beforeSend: function() {
+                            $("#default_loader").show();
+                        },
+                        success: function(data) {
+                            $("#default_loader").hide();   
+                            $("#msg_div").html(data);
+                            $("#msg_div").css('height','auto');
+                            var height = Math.max($("#thread_div").height(), $("#msg_div").height());
+                            $("#thread_div").height(height);
+                            $("#msg_div").height(height); 
+                        }, 
+                        error: function(err) {
+                            $("#default_loader").hide();
+                        }
+                    }); 
+                } else if(obj.ack=="2"){
+                    if(is_delete_thread=="is_delete_to"){
+                        location.assign("{% url 'admin_inbox_messages' %}"); 
+                    }else{
+                        location.assign("{% url 'admin_outbox_messages' %}"); 
+                    }
+                }
+                
+                else {
+                    showToast(obj.msg_type,obj.msg_type);
+                }
+            }, 
+            error: function(err) {
+                $("#default_loader").hide();
+                return "0";    
+            }
+        });
+    });
+});
+
+
+/* Delete Single Message */   
+</script>
+

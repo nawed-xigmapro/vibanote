@@ -1,0 +1,123 @@
+{% extends 'frontend/base.html' %}
+{% block metasocial %}
+<meta content="IE=edge" http-equiv=X-UA-Compatible>
+<meta content="width=device-width,initial-scale=1" name=viewport>
+<meta content="IE=edge" http-equiv=X-UA-Compatible>
+<meta content="width=device-width,initial-scale=1" name=viewport>
+<meta property="og:title" id="titleogid" content="Vibanote" />
+<meta property="og:type" content="website" />
+<meta property="og:description" id="descriptionogid" content="For music lovers" />
+<meta property="og:url" id="urlogid" content="http://119.18.52.139:8000{{ request.get_full_path }}" />
+<meta property="og:image" id="imageogid" content="http://119.18.52.139:8000/static/images/inner-banner.jpg" />
+ 
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@VibanoteMedia">
+<meta name="twitter:url" content="http://119.18.52.139:8000{{ request.get_full_path }}">
+<meta name="twitter:title" content="Vibanote">
+<meta name="twitter:description" content="For music lovers">
+<meta name="twitter:creator" content="@VibanoteMedia">
+<meta name="twitter:image:src" content="http://119.18.52.139:8000/static/images/inner-banner.jpg" />
+<meta name="twitter:image:alt" content="Vibanote MEDIA" />
+{% comment %}<meta name="twitter:domain" content="socialmediamarketinginc.com"> {% endcomment %}
+{% endblock %}
+{% block title %}video detail{% endblock %}
+{% block content %}
+{% load template_functions %}
+{% load social_share %}
+<div class="container">
+    {% comment %}
+	<div class="album-banner public-bg">
+		<div class="row">
+			<div class="col-md-3 col-sm-3 text-center">
+                            <div class="album-pro-pic">
+                            {% if video_details.picture %}    
+				<img alt="{{video_details.name}}" src="/media/{{video_details.picture}}">
+                            {% else %}
+                                <img alt="{{video_details.name}}" src="/static/images/no-content-image.png">
+                            {% endif %}
+                            </div>	
+			</div>
+			<div class="col-md-9 col-sm-9">
+				<h2><span>{{video_details.name}}</span></h2>
+			</div>
+		</div>
+	</div>
+    {% endcomment %}
+	<div class="pulic-track-detail">
+		<div class="row">
+			<div class="col-md-6 col-sm-6 col-xs-12">
+				<iframe width="100%" height="315" src="{{video_details.link}}" frameborder="0" allowfullscreen></iframe>
+			</div>
+			<div class="col-md-6 col-sm-6 col-xs-12">
+				<h2 class="tr-title">{{video_details.title}}</h2>
+				{% comment %}<h3 class="tr-subtitle">Track Sub Title</h3>{% endcomment %}
+				<div class="album-details-share">
+					<ul>
+						<li><a class="ns_likeit" data-likeid="{{video_details.id}}" data-liketype="video" href="javascript:void(0)"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i><span>{{video_details.like_counts}}</span></a></li>
+						<li>
+							<div class="facebook-this">
+							{% post_to_facebook object_or_url 'Facebook Share' %}
+							</div>
+						</li>
+						<li>
+							<div class="tweet-this">
+							{% post_to_twitter "" object_or_url  "Twitter Share"  %}
+							</div>
+						</li>
+					</ul>
+				</div>
+				<h3 class="tr-subtitle"><span>Genre :</span> {{video_details.genretitle}}</h3>
+				<h3 class="tr-subtitle"><span>Type :</span> {{video_details.typetitle}}</h3>
+                                <h3 class="tr-subtitle"><span>Artist :</span><a style="color: #848484;" href="{% url 'artist_details' video_details.username %}">{{video_details.name}}</a></h3>
+				{% if video_details.dedicate %}
+                                {% get_tags video_details.dedicate as showtags %}
+                                <div class="tags">
+					<div class="tags-content">
+					<h2><i class="fa fa-heart" aria-hidden="true"></i> This song is dedicated to:</h2>
+					{% for showtag in showtags %}
+                                                    <span><a href="#{{showtag}}">{{showtag}}</a></span> 
+                                        {% endfor %} 
+					</div>          
+				</div>
+                                {% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %} 
+{% block script %}
+<script>
+$( document ).ready(function() {
+    $( ".ns_likeit" ).each(function( index ) {
+    var nsthis = $( this );
+    nsthis.click(function() {
+        var user_id = '{{request.session.member_id}}';
+        if(user_id){ 
+        var lid = nsthis.data("likeid");
+        var ltype = nsthis.data("liketype");
+        //alert(ltype);
+        $.ajax({ // create an AJAX call...
+            data:{ lid : lid, ltype : ltype },
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            type: "POST",
+            url: '/like-it/', // the file to call
+            success: function(response) { // on success..
+                var result = JSON.parse(response);
+                if(result.Ack=="1"){
+                   nsthis.find(' span').html(result.likes);
+                   showToast(result.msg_type,result.msg); 
+                } else{
+                   showToast(result.msg_type,result.msg); 
+                } 
+            }
+        });
+      } else {
+          showToast("error","Please Logged in to like!");
+      }  
+    });
+}); 
+});    
+
+</script>
+{% endblock %}
